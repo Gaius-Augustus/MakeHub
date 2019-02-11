@@ -1202,8 +1202,7 @@ trackDb_file = hub_dir + "trackDb.txt"  # main UCSC hub configuration file
 
 ''' Generate essential files for genome display '''
 
-visibility_counter = 0  # not more than 10 tracks should be unhidden for first
-# connect
+visibility_counter = 0  # not more than 10 tracks should be unhidden
 
 if not args.add_track:
     TwoBit_file = hub_dir + args.short_label + ".2bit"
@@ -1726,11 +1725,7 @@ if args.maker_gff:
             this_maker_bb_file = hub_dir + feature + "_" + "maker.bb"
             bed2bigBed(12, this_sorted_maker_file,
                        ChromSizes_file, this_maker_bb_file)
-            if visibility_counter <= 10:
-                visibility = "dense"
-                visibility_counter = visibility_counter + 1
-            else:
-                visibility = "hide"
+            visibility_counter, visibility = set_visibility(visibility_counter)
             info_to_trackDB(trackDb_file, feature + "_maker", "Evidence by MAKER from source " + feature, rgb_cols[col_idx],
                             "makerEvidence", 12, visibility)
             col_idx = col_idx + 1
