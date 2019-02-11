@@ -116,10 +116,6 @@ parser.add_argument('-N', '--latin_name', required=False, type=str,
                     help="Latin species name, e.g. \"Drosophila melanogaster\". This " +
                     "argument must be provided if the hub is supposed to be added to the " +
                     "public UCSC list.")
-parser.add_argument('-O', '--organism', required=False, type=str,
-                    help="Common organism name, e.g. \"fruit fly\". This " +
-                    "argument must be provided if the hub is supposed to be added to the " +
-                    "public UCSC list.")
 parser.add_argument('-V', '--assembly_version', required=False, type=str,
                     help="Assembly version, e.g. \"BDGP R4/dm3\". This " +
                     "argument must be provided if the hub is supposed to be added to the " +
@@ -133,8 +129,6 @@ args = parser.parse_args()
 
 if args.latin_name is None:
     args.latin_name = args.long_label
-if args.organism is None:
-    args.organism = args.long_label
 if args.assembly_version is None:
     args.assembly_version = ""
 
@@ -441,6 +435,15 @@ except OSError as e:
         raise
 
 ''' ******************* BEGIN FUNCTIONS *************************************'''
+
+
+def set_visibility(v):
+    if v < 10:
+        print_vis = "dense"
+        v = v + 1
+    else:
+        print_vis = "hide"
+    return v, print_vis
 
 ''' Function that runs a subprocess with arguments '''
 
@@ -750,7 +753,7 @@ def gtf2bb(gtf_file, gp_file, bed_file, bb_file, info_out_file, chrom_size_file,
 ''' Function that writes info about gene pred or hints to trackDb file '''
 
 
-def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group, bed_no):
+def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group, bed_no, visibility):
     # if maker track, use separate name for label...
     track_name = short_label
     if(re.search(r'_maker', track_name)):
@@ -764,7 +767,7 @@ def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group, bed
                                  str(bed_no) + " .\n" +
                                  "bigDataUrl " + short_label + ".bb\n" +
                                  "color " + rgb_color + "\n" +
-                                 "visibility 4\n\n" +
+                                 "visibility " + visibility + "\n\n" +
                                  "group " + group + "\ntype bigBed " +
                                  str(bed_no) + " .\n" +
                                  "bigDataUrl " + short_label + ".bb\n" +
@@ -780,7 +783,7 @@ def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group, bed
 ''' Function that converts gtf to gene prediction track '''
 
 
-def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_label, rgb_color):
+def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_label, rgb_color, visibility):
     gp_file = tmp_dir + short_label + ".gp"
     info_out_file = tmp_dir + short_label + ".infoOut.txt"
     bed_file = tmp_dir + short_label + ".bed"
@@ -788,7 +791,7 @@ def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_la
     gtf2bb(gtf_file, gp_file, bed_file, bb_file,
            info_out_file, chrom_size_file, sort_tool)
     info_to_trackDB(trackDb_file, short_label, long_label,
-                    rgb_color, "genePreds", 12)
+                    rgb_color, "genePreds", 12, visibility)
     # parse info_out_file to produce txt file for creating nameIndex files
     name_index_txt_file = tmp_dir + short_label + ".nameIndex.txt"
     try:
@@ -1169,7 +1172,7 @@ def maker_to_gtf(line_lst, outfile):
 ''' Function that writes aboutHub.html file '''
 
 
-def write_aboutHub(outfile, title, organism, latin, assembly, email):
+def write_aboutHub(outfile, title, latin, assembly, email):
     try:
         with open(outfile, "w") as handle:
             handle.write(
@@ -1177,7 +1180,7 @@ def write_aboutHub(outfile, title, organism, latin, assembly, email):
             handle.write("<html>\n<head>\n<title>" + title +
                          "</title>\n</head>\n<body>\n<hr>\n")
             handle.write("<h1>title</h1>\n<hr><p>This is an Assembly Hub for display with the UCSC Genome Browser that was automatically generated for the single species " +
-                         organism + " (" + latin + "), assembly version " + assembly + " with make_hub.py version " + version + ".</p>")
+                         title + " (" + latin + "), assembly version " + assembly + " with make_hub.py version " + version + ".</p>")
             handle.write("<p>Contact: " + email + "</p>")
             handle.write("<hr>\n</body>\n</html>\n")
     except IOError:
@@ -1199,6 +1202,8 @@ trackDb_file = hub_dir + "trackDb.txt"  # main UCSC hub configuration file
 
 ''' Generate essential files for genome display '''
 
+visibility_counter = 0  # not more than 10 tracks should be unhidden for first
+# connect
 
 if not args.add_track:
     TwoBit_file = hub_dir + args.short_label + ".2bit"
@@ -1249,7 +1254,7 @@ if not args.add_track:
               " for writing!")
         quit(1)
     about_file = args.outdir + "/" + args.short_label + "/aboutHub.html"
-    write_aboutHub(about_file, args.long_label, args.organism,
+    write_aboutHub(about_file, args.long_label,
                    args.latin_name, args.assembly_version, args.email)
 
     default_seq_id = ""
@@ -1303,9 +1308,10 @@ if not args.add_track:
 
     try:
         with open(trackDb_file, "w+") as trackDb_handle:
+            visibility_counter, visibility = set_visibility(visibility_counter)
             trackDb_handle.write("track gcPercent\nlongLabel GC Percent in 5-base " +
                                  "Window\nshortLabel GC Percent\n" +
-                                 "type bigWig 0 100\ngroup map\nvisibility dense" +
+                                 "type bigWig 0 100\ngroup map\nvisibility " + visibility +
                                  "\nwindowingFunction Mean\nbigDataUrl " +
                                  args.short_label + ".gc5Base.bw\npriority 2\nautoScale Off\n" +
                                  "maxHeightPixels 128:36:16\ngraphTypeDefault Bar\ngridDefault OFF\n" +
@@ -1348,10 +1354,11 @@ if not args.add_track:
                    ChromSizes_file, softmaskedBigBed_file)
         try:
             with open(trackDb_file, "a") as trackDb_handle:
+                visibility_counter, visibility = set_visibility(visibility_counter)
                 trackDb_handle.write("track RMsoft\nlongLabel Softmaked Repeats\n" +
                                      "shortLabel Repeats\ngroup reps\ntype bigBed 3 .\n" +
                                      "bigDataUrl " + args.short_label +
-                                     "_softmasking.bb\n" +
+                                     "_softmasking.bb\nvisibility " + visibililty + "\n" +
                                      "color " + rgb_cols[col_idx] +
                                      "\n\ngroup reps\ntype bigBed 3 .\n" +
                                      "bigDataUrl " + args.short_label +
@@ -1366,6 +1373,23 @@ if not args.add_track:
                   str(frameinfo.lineno) + ': ' + "Failed to open file " +
                   trackDb_file + " for writing!")
             quit(1)
+
+
+''' check how many tracks are already visible in existing hub '''
+
+if args.add_track:
+    try:
+        with open(trackDb_file, "r") as trackDb_handle:
+            for line in trackDb_handle:
+                if re.search(r'visibility', line):
+                    if not(re.search(r'hide', line)):
+                        visibility_counter = visibility_counter + 1
+    except IOError:
+        frameinfo = getframeinfo(currentframe())
+        print('Error in file ' + frameinfo.filename + ' at line ' +
+              str(frameinfo.lineno) + ': ' + "Failed to open file " +
+              trackDb_file + " for reading!")
+        quit(1)
 
 
 ''' Creating RNA-Seq bam track(s) '''
@@ -1385,6 +1409,7 @@ if args.bam and args.display_bam_as_bam:
         run_simple_process(subprcs_args)
         try:
             with open(trackDb_file, "a") as trackDb_handle:
+                visibility_counter, visibility = set_visibility(visibility_counter)
                 trackDb_handle.write("track RNASeq_" + str(bam_index) + "\n" +
                                      "bigDataUrl rnaseq_" + str(bam_index) +
                                      ".s.bam\n" +
@@ -1393,7 +1418,9 @@ if args.bam and args.display_bam_as_bam:
                                      "longLabel RNASeq bam file "
                                      + str(bam_index) + " from file " +
                                      bam_file +
-                                     "\ngroup hints\nvisibility 4\ntype bam\n\n" +
+                                     "\ngroup hints\nvisibility ")
+                trackDb_handle.write(visibility)
+                trackDb_handle.write("\ntype bam\n\n" +
                                      "group hints\nbigDataUrl rnaseq_" +
                                      str(bam_index) + ".s.bam\n")
         except IOError:
@@ -1449,12 +1476,20 @@ if args.bam:
         print("Writing to track db")
         try:
             with open(trackDb_file, "a") as trackDb_handle:
+                visibility_counter, visibility = set_visibility(visibility_counter)
                 trackDb_handle.write("track RNASeq_wig_" + str(bam_index)
                                      + "\n" + "type bigWig\n" +
-                                     "bigDataUrl rnaseq_" + str(bam_index) + ".bw\n" +
-                                     "shortLabel RNASeq_" + str(bam_index) + "\n" +
-                                     "longLabel RNASeq Wiggle " + str(bam_index) + " from bam file " +
-                                     bam_file + "\ncolor " + rgb_cols[col_idx] + "\nyLineOnOff on\nyLineMark 0\ngridDefault on\n\ngroup hints\ntype bigWig\nbigDataUrl rnaseq_" + str(bam_index) + ".bw\ncolor " + rgb_cols[col_idx] + "\n\n")
+                                     "bigDataUrl rnaseq_" + str(bam_index) +
+                                     ".bw\n" +
+                                     "shortLabel RNASeq_" + str(bam_index) +
+                                     "\n" +
+                                     "longLabel RNASeq Wiggle " +
+                                     str(bam_index) + " from bam file " +
+                                     bam_file + "\ncolor " + rgb_cols[col_idx] +
+                                     "\nyLineOnOff on\nyLineMark 0\ngridDefault on\nvisibility ")
+                trackDb_handle.write(visibility)
+                trackDb_handle.write("\n\ngroup hints\ntype bigWig\nbigDataUrl rnaseq_" +
+                                     str(bam_index) + ".bw\ncolor " + rgb_cols[col_idx] + "\n\n")
                 col_idx = col_idx + 1
                 if col_idx > 25:
                     col_idx = 0
@@ -1475,19 +1510,22 @@ if args.annot:
     check_trackDb(trackDb_file, "Reference Annotation")
     ucsc_file = tmp_dir + "annot_ucsc.gtf"
     make_gtf_sane(args.annot, ucsc_file)
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "annot",
-                   "Reference Annotation", rgb_cols[col_idx])
+                   "Reference Annotation", rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
+
 
 ''' Creating genemark prediction track '''
 
 if args.genemark:
     print('Generating GeneMark prediction track...')
     check_trackDb(trackDb_file, "GeneMark predicitons")
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, args.genemark, ChromSizes_file, "genemark",
-                   "GeneMark predictions", rgb_cols[col_idx])
+                   "GeneMark predictions", rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1500,10 +1538,11 @@ if args.aug_ab_initio:
     check_trackDb(trackDb_file, "AUGUSTUS ab initio predictions without UTRs")
     ucsc_file = tmp_dir + "aug_ab_initio_ucsc.gtf"
     aug2ucsc_gtf(args.aug_ab_initio, ucsc_file)
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file,
                    "aug_ab_initio_no_utr",
                    "AUGUSTUS ab initio predictions without UTRs",
-                   rgb_cols[col_idx])
+                   rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1516,10 +1555,11 @@ if args.aug_hints:
     check_trackDb(trackDb_file, "AUGUSTUS predictions with hints without UTRs")
     ucsc_file = tmp_dir + "aug_hints_ucsc.gtf"
     aug2ucsc_gtf(args.aug_hints, ucsc_file)
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file,
                    "aug_hints_no_utr",
                    "AUGUSTUS predictions with hints without UTRs",
-                   rgb_cols[col_idx])
+                   rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1532,10 +1572,11 @@ if args.aug_ab_initio_utr:
     ucsc_file = tmp_dir + "aug_ab_initio_utr_ucsc.gtf"
     check_trackDb(trackDb_file, "AUGUSTUS ab initio predictions with UTRs")
     aug2ucsc_gtf(args.aug_ab_initio_utr, ucsc_file)
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file,
                    "aug_ab_initio_utr",
                    "AUGUSTUS ab initio predictions with UTRs",
-                   rgb_cols[col_idx])
+                   rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1548,12 +1589,14 @@ if args.aug_hints_utr:
     check_trackDb(trackDb_file, "AUGUSTUS predictions with hints and UTRs")
     ucsc_file = tmp_dir + "aug_hints_utr_ucsc.gtf"
     aug2ucsc_gtf(args.aug_hints_utr, ucsc_file)
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "aug_hints_utr",
                    "AUGUSTUS predictions with hints and UTRs",
-                   rgb_cols[col_idx])
+                   rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
+
 
 ''' Creating Gemoma filtered predictions track '''
 
@@ -1564,12 +1607,14 @@ if args.gemoma_filtered_predictions:
     gemoma2aug_gtf(args.gemoma_filtered_predictions, aug_file)
     ucsc_file = tmp_dir + "gemoma_ucsc.gtf"
     aug2ucsc_gtf(aug_file, ucsc_file)
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "gemoma_filtered_predictions",
                    "Gemoma filtered predictions",
-                   rgb_cols[col_idx])
+                   rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
+
 
 ''' Creating general gene track with custom label '''
 
@@ -1596,8 +1641,9 @@ if args.gene_track:
         print('Error in file ' + frameinfo.filename + ' at line ' +
               str(frameinfo.lineno) + ': ' + "Failed to open file " +
               args.gene_track[0] + " for reading!")
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, args.gene_track[1],
-                   args.gene_track[1], rgb_cols[col_idx])
+                   args.gene_track[1], rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_dix = 0
@@ -1608,8 +1654,9 @@ if args.gene_track:
 if args.traingenes:
     print('Generating training gene track...')
     check_trackDb(trackDb_file, "Training genes")
+    visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, args.traingenes, ChromSizes_file, "traingenes",
-                   "Training genes", rgb_cols[col_idx])
+                   "Training genes", rgb_cols[col_idx], visibility)
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1679,8 +1726,13 @@ if args.maker_gff:
             this_maker_bb_file = hub_dir + feature + "_" + "maker.bb"
             bed2bigBed(12, this_sorted_maker_file,
                        ChromSizes_file, this_maker_bb_file)
+            if visibility_counter <= 10:
+                visibility = "dense"
+                visibility_counter = visibility_counter + 1
+            else:
+                visibility = "hide"
             info_to_trackDB(trackDb_file, feature + "_maker", "Evidence by MAKER from source " + feature, rgb_cols[col_idx],
-                            "makerEvidence", 12)
+                            "makerEvidence", 12, visibility)
             col_idx = col_idx + 1
             if col_idx > 25:
                 col_idx = 0
@@ -1690,8 +1742,9 @@ if args.maker_gff:
             maker_to_gtf(maker_categ[feature]['lines'], this_maker_file)
             ucsc_file = this_maker_file + ".f"
             aug2ucsc_gtf(this_maker_file, ucsc_file)
+            visibility_counter, visibility = set_visibility(visibility_counter)
             make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, feature,
-                           "MAKER gene predictions", rgb_cols[col_idx])
+                           "MAKER gene predictions", rgb_cols[col_idx], visibility)
             col_idx = col_idx + 1
             if col_idx > 25:
                 col_idx = 0
@@ -1811,10 +1864,11 @@ if args.hints:
                 sort_bed3(this_hints_file, this_sorted_hints_file)
                 bed2bigBed(12, this_sorted_hints_file,
                            ChromSizes_file, bb_file)
+            visibility_counter, visibility = set_visibility(visibility_counter)
             info_to_trackDB(trackDb_file, h_src + "_" + h_type + "_hints_" +
                             str(hint_file_no), "Hints of type " + h_type +
                             " from source " + h_src, rgb_cols[col_idx],
-                            "hints", 12)
+                            "hints", 12, visibility)
             col_idx = col_idx + 1
             if col_idx > 25:
                 col_idx = 0
