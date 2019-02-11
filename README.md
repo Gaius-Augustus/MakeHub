@@ -1,7 +1,7 @@
 # MakeHub User Guide
 
-Author and Contact Information {#authors-and-contact-information .unnumbered}
--------------------------------
+Author and Contact Information
+------------------------------
 
 Katharina J. Hoff, University of Greifswald, Institute for
 Mathematics and Computer Science, Bioinformatics Group
