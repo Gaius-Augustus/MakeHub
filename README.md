@@ -14,18 +14,16 @@ Contents
 -   [Installation](#installation)
     -   [Dependencies](#dependencies)
     -   [MakeHub](#makehub)
--   [Data preprocessing](#preprocessing)
-    -   [BRAKER output](#braker_output)
-    -   [MAKER output](#maker_output)
-    -   [GeMoMa output](#gemoma_output)
+-   [Data preparation](#preparation)
 -   [Running MakeHub](#running-makehub)
     -   [Creating a new hub](#creating-new-hub)
     -   [Adding tracks to existing hub](#adding_tracks)
     -   [Options explained](#options_explained)
+-   [Example data](#example_data)
 -   [Output of MakeHub](#output-of-makehub)
 -   [How to use MakeHub output with UCSC Genome Browser](#use_makehub)
 -   [Bug reporting](#bug-reporting)
--   [Citing MakeHub](#citing-braker2-and-software-called-by-braker2)
+-   [Citing MakeHub](#citingmakehub)
 -   [License](#license)
 
 
@@ -34,8 +32,11 @@ What is MakeHub? {#what-is-makehub}
 
 MakeHub is a command line tool for the fully automatic generation
 of track data hubs[^fn1] for visualizing genomes with the UCSC genome
-browser[^fn2]. Track data hubs are data structures that contain all required information about a genome for visualizing with the UCSC genome browser.
-Track data hubs need to be hosted on a publicly available webspace
+browser[^fn2]. Track data hubs are data structures that contain all 
+required information about a genome for visualizing with the UCSC 
+genome browser.
+
+Assembly  hubs need to be hosted on a publicly available webspace
 (that might be user/password protected) for usage with the UCSC
 genome browser.
 
@@ -48,10 +49,11 @@ the AUGUSTUS [^fn4] tool bam2wig is used to speed up BAM to
 wig format conversion (<https://github.com/Gaius-Augustus/Augustus>),
 which is otherwise performed without bam2wig.
 
-MakeHub can either be used to create entirely new track data hubs,
-or it can be used to add tracks to hubs that were previously created by MakeHub.
+MakeHub can either be used to create entirely new assembly hubs,
+or it can be used to add tracks to hubs that were previously created 
+by MakeHub.
 
-For display by the UCSC Genome Browser, track data hubs need to be
+For display by the UCSC Genome Browser, assembly hubs need to be
 hosted on a publicly accessible web server.
 
 Installation {#installation}
@@ -114,7 +116,8 @@ You may download these binaries and make them available in your
 $PATH. However, if you skip installing these tools, they will
 be downloaded during MakeHub execution, automatically.
 
-MakeHub uses Samtools for BAM file sorting and conversion. Samtools is avilable at <https://github.com/samtools/>. It is also avilable as
+MakeHub uses Samtools for BAM file sorting and conversion. Samtools is
+avilable at <https://github.com/samtools/>. It is also avilable as
 package with many linux distributions.
 
 For example, on ubuntu, install samtools with:
@@ -161,7 +164,7 @@ python3 make_hub.py
 
 If you add make_hub.py to your $PATH (i.e. by adding the location
 of make_hub.py at the bottom of your ~/.bashrc file similar to
-```PATH=/path/to/MakeHub:$PATH```, followed by loading the 
+```PATH=/path/to/MakeHub:$PATH```, followed by loading the
 ~/.bashrc file in case you did not re-open a new bash session with
 ```source ~/.bashrc```)and make it executable (i.e.
 with ```chmod u+x make_hub.py```), it can
@@ -173,7 +176,7 @@ make_hub.py
 
 from  any location on your computer.
 
-Data preprocessing {#preprocessing}
+Data Preparation {#preparation}
 ==================
 
 MakeHub accepts files in the following formats:
@@ -181,127 +184,337 @@ MakeHub accepts files in the following formats:
 * genome file in FASTA format (simple FASTA headers without
   whitespaces or special characters); if the file is
   softmasked, a track with repeat information will 
-  automatically be generated
+  automatically be generated. Note that the FASTA headers
+  must be consistent with BAM-, hints- and gene prediction
+  files.
 * BAM file(s) with RNA-Seq to genome alignments
-* gene prediction file(s) in GTF-format
+* gene prediction file(s) in GTF-format, e.g. from BRAKER
 * AUGUSTUS hints files in BRAKER-specific GFF hints format
+* Gene prediction files in GFF3-format from MAKER and Gemoma
 
 
-BRAKER output {#braker_output}
--------------
-
-No particular data preprocessing is required for using BRAKER output files. Please use the default GTF-files, not the optional GFF3 files for visualizing BRAKER gene predictions with MakeHub.
-
-
-MAKER output {#maker_output}
-------------
-
-MAKER GFF3 files should be converted to GTF-format prior usage with MakeHub.
-We recommend using GenomeTools for format conversion. GenomeTools are
-available at <http://genometools.org/pub/>. GenomeTools are also
-available as a package for some Unix distributions.
-
-For example, install GenomeTools as follows on Ubuntu:
-
-```
-sudo apt install genometools
-```
-
-After the gff3_merges step of MAKER, which produces a file such as
-maker.gff3, check the predictions for inconsistencies as follows:
-
-```
-gt  gff3  -force  -tidy  -o maker_by_gt.gff3  -retainids  -sort  makergff3  2>  errors_by_GenomeTools
-cat errors_by_GenomeTools | grep -v gbunit | cut -f6 -d' ' | sort | uniq -c | wc -l
-```
-
-This will for example tell you that there are a number of issues 
-- or no issues at all.
-
-Convert the maker_by_gt.gff file to GTF-format as follows:
-
-```
-gt  gff3_to_gtf  -force  -o maker.gtf  maker_by_gt.gff3
-```
-
-Running this command may possibly tell you about features that have
-been skipped during conversion. The resulting maker.gtf file can
-serve as input for MakeHub.
-
-
-Gemoma output {#gemoma_output}
--------------
-
-No particular data preprocessing is required for using the Gemoma output file ```filtered_predictions.gff``` in GFF3-format. Please use the MakeHub
-option ```--gemoma_filtered_predictions``` for passing this file.
 
 Running MakeHub {#running-makehub}
 ===============
 
-MakeHub can be used either to create new track data hubs, or to add
-tracks to track data hubs that had previously been created.
+MakeHub can be used either to create new assembly hubs, or to add
+tracks to assembly hubs that had previously been created.
 
 Creating a new hub {#creating-new-hub}
 ------------------
 
-The essential arguments for creating a new track data hub are:
+The essential arguments for creating a new assembly hub are:
 
-* ```--email```/```-e``` EMAIL_ADDRESS - this should be the valid contact information of a hub creator.
+* ```-e EMAIL```, ```--email EMAIL```
+  Contact e-mail adress for assembly
+  hub. This e-mail adress will be displayed on all HTML pages that
+  describe this hub and its tracks. Providing an e-mail adress is
+  a requirement for UCSC assembly hubs, e.g. described at
+  <http://genomewiki.ucsc.edu/index.php/Assembly_Hubs> and
+  <http://genomewiki.ucsc.edu/index.php/Public_Hub_Guidelines#Track_description_page_recommendations>.
 
-* ```--genome```/```-g``` GENOME_IN_FASTA_FORMAT - this should be a 
-  single species genome file in FASTA format. If the file contains
-  softmasked repeats, a repeat masking track with softmasking 
-  information will automatically be generated.
-  
-* ```--short_label```/```-l``` SHORT_LABEL - this should be a short
-  name of the track data hub (without whitespaces). This label will
-  for example be used as name for directories produced by
-  MakeHub.
+* ```-g GENOME```, ```--genome GENOME```
+  Genome file in FASTA format. If the file contains softmasked repeats,
+  a repeat masking track with softmasking information will automatically be
+  generated.
 
-We strongly recommend the additional usage of
+* ```-l SHORT_LABEL```, ```--short_label SHORT_LABEL```
+  Short label (without whitespaces and special characters) for identifying 
+  assembly hub, will also be used as directory name for hub, e.g. 
+  ```--short_label fly```
 
-* ```--long_label```/```-L``` LONG_LABEL - this should be an
-  appropriate description of the track data hub, e.g. containing
-  the latin and english species names, a project name, or similar.
-  Put the LONG_LABEL in quotation marks in case it contains
-  whitespaces.
+At the point in time of assembly hub creation, we strongly recommend the 
+additional usage of
 
-In the following, we show how to obtain example data and
-how to generate a small example hub. We will use example data
-provided by BRAKER:
+* ```-L LONG_LABEL```, ```--long_label LONG_LABEL```
+  Long label for hub, e.g. english organism name, if it contains whitespaces,
+  pass it with quotation marks: ```---long_label "fruit fly"```
 
+You may at the point of time of creating a hub already supply information
+about all gene prediction and evidence tracks that you would like to
+see in your final hub. Please have a look at the section 
+[Options Explained](#options_explained) for information about possible
+tracks. The section also describes how to add latin species name and
+assembly version.
+
+Usage example 1:
 
 ```
-mkdir example_hub
-cd example_hub
-wget https://github.com/Gaius-Augustus/BRAKER/raw/master/example/genome.fa
-make_hub.py -l example_hub -L \
-  "This is an example track data hub with data from BRAKER" \
-  -g genome.fa -e katharina.hoff@uni-greifswald.de
+make_hub.py -l hmi1 -L "Rodent tapeworm" -g data/genome.fa -e \
+  katharina.hoff@uni-greifswald.de
 ```
 
-The resulting track data hub is trivial an contains only a GC content
-and repeat masking track.
+The resulting hub is trivial, as it only displays very basic information
+about the genome, such as the GC-content, restriction enzyme sites and
+repeat masking segments.
 
-Note that you can add numerous tracks already at the point of
-initial hub creation by using the MakeHub options, e.g. for
-gene prediction files. For the sake of illustration purposes,
-we will here add a couple of more tracks to the now existing
-example_hub in the next section.
+If you want to visualize the result, connect the following hub with the
+UCSC genome browser (see section 
+[How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
+<http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi1/hub.txt>
+
+
+Usage example 2:
+
+```
+make_hub.py -l hmi2 -L "Rodent tapeworm" -g data/genome.fa -e \
+  katharina.hoff@uni-greifswald.de -a data/annot.gtf -b data/rnaseq.bam \
+  -d
+```
+
+In comparison to the first example, the resulting hub has a track with
+reference annotation genes, and a track with coverage information from
+RNA-Seq data, and it displays the native BAM-file (```-d```).
+
+If you want to visualize the result, connect the following hub with the
+UCSC genome browser (see section 
+[How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
+<http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi2/hub.txt>
 
 Adding tracks to existing hub {#adding_tracks}
 -----------------------------
 
 If a hub already exists, you may add tracks to this existing hub
-using the option ```--add_track```.
+using the option ```-A```, ```--add_track```. The minimal required arguments
+- besides giving the approriate information that you would like to
+add - are:
 
+*  ```-A```, ```--add_track```
+
+* ```-e EMAIL```, ```--email EMAIL```
+  Contact e-mail adress for assembly
+  hub. 
+
+
+* ```-l SHORT_LABEL```, ```--short_label SHORT_LABEL```
+  Short label (without whitespaces and special characters) for identifying 
+  assembly hub.
+
+* ```-A```, ```--add_track```       
+  Add track(s) to existing hub
+
+Usage example 3:
+
+First, we create a novel track hub hmi3 that is identical to Usage example 2:
+
+```
+make_hub.py -l hmi3 -L "Rodent tapeworm" -g data/genome.fa -e \
+  katharina.hoff@uni-greifswald.de -a data/annot.gtf -b data/rnaseq.bam \
+  -d
+```
+
+Subsequently, we add a number of tracks:
+
+```
+make_hub.py -l hmi3 -e katharina.hoff@uni-greifswald.de -i data/hintsfile.gff \
+  -A -M data/maker.gff -X data
+```
+
+The resulting hub has many gene prediction tracks from the BRAKER output directory
+```data```, and from the MAKER output file ```data/maker.gff```.
+
+Let's add one more track (only for the sake of demonstration, this track could
+have been included in the previous example, or course, or at the point of time
+of track generation):
+
+```
+make_hub.py -l hmi3 -e katharina.hoff@uni-greifswald.de -i data/hintsfile.gff \
+  -A -E data/gemoma.gff
+```
+
+If you want to visualize the result, connect the following hub with the
+UCSC genome browser (see section
+[How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
+<http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi3/hub.txt>
 
 Options explained {#options_explained}
 -----------------
 
+In the following, we explain all options of make_hub.py
 
+* ```-h, --help```
+  Print help message and exit.
 
+* ```-p, --printUsageExamples```
+  Print usage examples for make_hub.py to command line (for demonstration).
 
+* ```-e EMAIL, --email EMAIL```
+  Contact e-mail adress for assembly hub. This is a requirement for all publicly
+  listed assembly hubs. It is obligatory for make_hub.py.
+
+* ```-g GENOME, --genome GENOME```
+  Genome file in FASTA format. If the file is softmasked for repeats, a
+  repeat masking track will automatically be generated, unless the option:
+
+* ```-n, --no_repeats```
+  Disable repeat track generation from softmasked genome sequence is activated
+  (this may save runtime, particularly for large genomes).
+
+* ```-L LONG_LABEL, --long_label LONG_LABEL```
+  Long label for hub, e.g. english organism name, if it contains whitespaces,
+  pass it with quotation marks: ```---long_label "fruit fly"```
+
+* ```-l SHORT_LABEL, --short_label SHORT_LABEL```
+  Short label (without whitespaces and special characters) for identifying 
+  assembly hub. The short label will also be used as assembly version, unless
+  the following option is specified:
+
+* ```-V ASSEMBLY_VERSION, --assembly_version ASSEMBLY_VERSION```
+  Assembly version, e.g. "BDGP R4/dm3". This argument must be provided if the
+  hub is supposed to be added to the public UCSC list.
+
+* ```-N LATIN_NAME, --latin_name LATIN_NAME```
+  Latin species name, e.g. "Drosophila melanogaster".
+  This argument must be provided if the hub is supposed to be added to the 
+  public UCSC list.
+
+* ```-s SAMTOOLS_PATH, --SAMTOOLS_PATH SAMTOOLS_PATH```
+  Path to samtools executable. By default, make_hub.py will search for a 
+  samtools executable in your $PATH. On some systems, e.g. high performance
+  compute clusters, it may be more conventient to specify the path to
+  samtools with this option while calling make_hub.py
+
+* ```-B BAM2WIG_PATH, --BAM2WIG_PATH BAM2WIG_PATH```
+  Path to bam2wig executable. bam2wig from AUGUSTUS auxprogs is not required
+  for converting a BAM to a WIG file with make_hub.py. It may be a little
+  faster than the built-in conversion function, though. By default, make_hub.py 
+  will search for a bam2wig executable in your $PATH. On some systems, e.g. 
+  high performance compute clusters, it may be more conventient to specify the 
+  path to bam2wig with this option while calling make_hub.py
+
+* ```-b BAM [BAM ...], --bam BAM [BAM ...]```
+  BAM file(s) - space separated - with RNA-Seq information, will be displayed
+  as BigWig coverage track.
+
+* ```-d, --display_bam_as_bam```
+  Display BAM file(s) as bam tracks (in addition to BigWig coverage tracks)
+
+* ```-c CORES, --cores CORES```
+  Number of cores for samtools sort processes that are used for producing
+  BAM tracks. Usage of more than one core may significantly speed up track
+  generation.
+
+* ```-a ANNOT, --annot ANNOT```
+  GTF file with reference annotation (may be particularly interesting to 
+  visualize in case of re-annotation of genomes).
+
+* ```-X BRAKER_OUT_DIR, --braker_out_dir BRAKER_OUT_DIR```
+  BRAKER output directory with GTF files. If this option is specified, the
+  following options are set, automatically, using the files in 
+  BRAKER_OUT_DIR (if these files exist):
+     * ```-i HINTS, --hints HINTS```
+     * ```-t TRAINGENES, --traingenes TRAINGENES```
+     * ```-m GENEMARK, --genemark GENEMARK```
+     * ```-w AUG_AB_INITIO, --aug_ab_initio AUG_AB_INITIO```
+     * ```-x AUG_HINTS, --aug_hints AUG_HINTS```
+     * ```-y AUG_AB_INITIO_UTR, --aug_ab_initio_utr AUG_AB_INITIO_UTR```
+     * ```-z AUG_HINTS_UTR, --aug_hints_utr AUG_HINTS_UTR```
+     
+* ```-i HINTS, --hints HINTS```
+  GFF file with BRAKER hints (AUGUSTUS-specific GFF format of BRAKER).
+
+* ```-t TRAINGENES, --traingenes TRAINGENES```
+  GTF file with training genes.
+
+* ```-m GENEMARK, --genemark GENEMARK```
+  GTF file with GeneMark predictions.
+
+* ```-w AUG_AB_INITIO, --aug_ab_initio AUG_AB_INITIO```
+  GTF file with ab initio AUGUSTUS predictions
+
+* ```-x AUG_HINTS, --aug_hints AUG_HINTS```
+  GTF file with AUGUSTUS predictions with hints
+
+* ```-y AUG_AB_INITIO_UTR, --aug_ab_initio_utr AUG_AB_INITIO_UTR```
+  GTF file with ab initio AUGUSTUS predictions with UTRs
+
+* ```-z AUG_HINTS_UTR, --aug_hints_utr AUG_HINTS_UTR```
+  GTF file with AUGUSTUS predictions with hints with UTRs
+
+* ```-M MAKER_GFF, --maker_gff MAKER_GFF```
+  MAKER2 output file in GFF3 format. This file could be the result of
+  a ```gff3_merge -d *_master_datastore_index.log``` command.
+
+* ```-E GEMOMA_FILTERED_PREDICTIONS, --gemoma_filtered_predictions GEMOMA_FILTERED_PREDICTIONS```
+  GFF3 output file of Gemoma (filtered_predictions.gff)
+
+* ```-G GENE_TRACK [GENE_TRACK ...], --gene_track GENE_TRACK [GENE_TRACK ...]```
+  Gene track with user specified label, argument must be formatted as follows
+  for adding a single track: 
+  ```--gene_track file.gtf tracklabel```
+
+* ```-A, --add_track```
+  Add track(s) to existing hub
+
+* ```-o OUTDIR, --outdir OUTDIR```
+  Output directory to write hub to (default is the current working directory).
+  This directory must be writable.
+
+* ```-r, --no_tmp_rm```      
+  Do not delete temporary files (e.g. for debugging purposes).
+  
+* ```-v VERBOSITY, --verbosity VERBOSITY```
+  If INT VERBOSITY > 0, verbose logging output is produced (e.g. for 
+  debugging purposes).
+
+Example data {#example_data}
+============
+
+Example data is located in the directory ```data/```. 
+It consists of the following files:
+
+* ```genome.fa```: sequence LN902858_1 of *Hymenolepis microstoma*, 
+  assembly version GCA_000469805.2 from GenBank.
+
+* ```rnaseq.fa```: RNA-Seq reads of library ERR337976 that
+  mapped to sequence LN902858_1 with Hisat2.
+
+* ```annot.gtf```: NCBI reference annotation of scaffold LN902858_1.
+
+* ```augustus.ab_initio.gtf```: AUGUSTUS *ab inito* gene predictions
+  from a BRAKER run (run was performed on the complete genome, 
+  predictions corresponding to LN902858_1 were extracted) with 
+  Hisat2 alignments from RNA-Seq library ERR337976.
+
+* ```augustus.hints.gtf```: AUGUSTUS gene predictions with hints
+  from a BRAKER run (run was performed on the complete genome, 
+  predictions corresponding to LN902858_1 were extracted) with 
+  Hisat2 alignments from RNA-Seq library ERR337976.
+
+* ```GeneMark-ET/genemark.gtf```: GeneMark-ES/ET predictions
+  from a BRAKER run (run was performed on the complete genome, 
+  predictions corresponding to LN902858_1 were extracted) with 
+  Hisat2 alignments from RNA-Seq library ERR337976.
+
+* ```hintsfile.gff```: Hints from a BRAKER run (run was performed 
+  on the complete genome, hints corresponding to LN902858_1 were 
+  extracted) with Hisat2 alignments from RNA-Seq library ERR337976.
+
+* ```gemoma.gff```: Gemoma predictions from a Gemoma run with
+ Hisat2 alignments from RNA-Seq library ERR337976 and proteins of
+ *Echinococcus multilocularis*. (Run was performed on the complete 
+ genome, predictions corresponding to LN902858_1 were extracted)
+
+* ```maker.gff```: MAKER2 predictions from a run with BRAKER
+ gene models as model_gff, Cufflinks assembly of Hisat2 alignments
+ of RNA-Seq library ERR337976, a custom repeat library for
+ RepeatMasker, AUGUSTUS with BRAKER-trained parameters, BUSCO
+ predictions as evidence, and GeneMark-ES/ET predictions with
+ BRAKER-trained parameters.
+
+Usage example 4:
+
+```
+make_hub.py -l hmi4 -L "Rodent tapeworm" -g data/genome.fa -e \
+  katharina.hoff@uni-greifswald.de -a data/annot.gtf -b data/rnaseq.bam \
+  -d -X data -M data/maker.gff -E data/gemoma.gff \
+  -N "Hymenolepsis microstoma" -V GCA_000469805.2
+```
+
+If you want to visualize the result, connect the following hub with the
+UCSC genome browser (see section
+[How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
+<http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi4/hub.txt>
 
 Output of MakeHub {#output-of-makehub}
 =================
@@ -313,18 +526,26 @@ assume the short label had been ```species```.
 ```species``` contains the following files:
 
 * ```hub.txt``` - this file contains basic information about the 
-  track data hub, for example, the short and long labels, a 
+  assembly hub, for example, the short and long labels, a 
   reference to ```genomes.txt```, and contact information.
   
 * ```genomes.txt``` - this file contains references to the 
   configuration files ```trackDb.txt``` and ```groups.txt```, as 
   well as for example a default browsing location.
 
+* ```aboutHub.html``` - this file should contain a meaningful
+  description of your assembly hub. Please edit this file, manually.
+
 Furthermore, ```species``` contains another directory ```species```
-in which the files ```trackDb.txt``` and ```groups.txt```, as well
+in which the hub configuration files ```trackDb.txt``` and 
+```groups.txt```, as well
 as all files that are required for browsing tracks, reside. The
 number of files may differ depending on how many tracks have
 actually been created.
+
+Importantly, ```species``` also contains ```*.html``` files for all
+tracks. These files should be edited, manually, to contain meaningful
+information!
 
 How to use MakeHub output with UCSC Genome Browser {#use_makehub}
 ==================================================
@@ -359,16 +580,17 @@ STDOUT. Please let us know at which step and with what
 error message make_hub.py caused problems.
 
 
+Citing MakeHub {#citingmakehub}
+==============
+
+Hoff KJ, https://github.com/Gaius-Augustus/MakeHub (manuscript is in preparation)
+
 License {#license}
--------
+=======
 
 All source code is under GNU public license 3.0 (see
 <https://www.gnu.org/licenses/gpl-3.0.de.html>).
 
-
-
-References
-----------
 
 
 [^fn1]: Raney BJ, Dreszer TR, Barber GP, Clawson H, Fujita PA, Wang T, Nguyen N, Paten B, Zweig AS, Karolchik D, Kent WJ. 2014.
