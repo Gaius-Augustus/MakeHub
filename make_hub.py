@@ -445,6 +445,7 @@ def set_visibility(v):
         print_vis = "hide"
     return v, print_vis
 
+
 ''' Function that runs a subprocess with arguments '''
 
 
@@ -767,7 +768,8 @@ def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group, bed
                                  str(bed_no) + " .\n" +
                                  "bigDataUrl " + short_label + ".bb\n" +
                                  "color " + rgb_color + "\n" +
-                                 "visibility " + visibility + "\n\n" +
+                                 "visibility " + visibility +
+                                 "\nhtml " + short_label + ".html\n\n" +
                                  "group " + group + "\ntype bigBed " +
                                  str(bed_no) + " .\n" +
                                  "bigDataUrl " + short_label + ".bb\n" +
@@ -1179,10 +1181,50 @@ def write_aboutHub(outfile, title, latin, assembly, email):
                 "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd\">\n")
             handle.write("<html>\n<head>\n<title>" + title +
                          "</title>\n</head>\n<body>\n<hr>\n")
-            handle.write("<h1>title</h1>\n<hr><p>This is an Assembly Hub for display with the UCSC Genome Browser that was automatically generated for the single species " +
-                         title + " (" + latin + "), assembly version " + assembly + " with make_hub.py version " + version + ".</p>")
+            handle.write("<h1>" + title +
+                         "</h1>\n<hr><p>This is an Assembly Hub for display with the UCSC Genome Browser that was automatically generated for the single species " +
+                         title + " (" + latin + "), assembly version " +
+                         assembly + " with make_hub.py version " + version +
+                         ".</p>")
             handle.write("<p>Contact: " + email + "</p>")
             handle.write("<hr>\n</body>\n</html>\n")
+    except IOError:
+        frameinfo = getframeinfo(currentframe())
+        print('Error in file ' + frameinfo.filename + ' at line ' +
+              str(frameinfo.lineno) + ': ' + "Failed to open file " + outfile +
+              " for writing!")
+        quit(1)
+
+
+''' Function that writes track description page '''
+
+
+def write_trackDescription(outfile, track_name, short_method, email, track_color):
+    try:
+        with open(outfile, "w") as handle:
+            handle.write(
+                "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd\">\n")
+            handle.write("<html>\n<head>\n<title>" + track_name +
+                         "</title>\n</head>\n<body>\n<hr>\n")
+            handle.write("<h1>" + track_name + "</h1>\n<hr>\n")
+            handle.write("<h2>Description</h2>\n" +
+                         "The track " + track_name + " was automatically generated using <a href=\"https://github.com/Gaius-Augustus/MakeHub\">make_hub.py</a>. " +
+                         "We strongly recommend that the creator of this hub modifies this page to be more informative!</p>" +
+                         "<h2>Display Conventions and Configuration</h2>\n" +
+                         "<p>This section describes track configuration controls, or any special display conventions such as the meaning of different colors in your tracks.</p>" +
+                         "<p>By default, all items in this track have the RGB color " +
+                         track_color + ".</p>\n" +
+                         "<h2>Methods</h2>\n" +
+                         "<p>This section describes the methods used to generate and analyze the data and helps users understand how the track data was produced and sometimes has subsections if useful.</p>" +
+                         "<p>The default methods description for this track provided by make_hub.py is:</p>\n" +
+                         "<p>" + short_method + "</p>\n" +
+                         "<h2>Credits</h2>\n" +
+                         "<p>Please list invidividuals and/or organizations who contributed to the collection and analysis of the data. Be sure to include a preferred contact email address for users who have questions concerning the data.</p>" +
+                         "<p>Please direct questions about this assembly hub to " + email + ".</p>\n" +
+                         "<h2>References</h2>" +
+                         "<p>Hoff KJ (2019) <a href=\"https://github.com/Gaius-Augustus/MakeHub\">MakeHub</a> (manuscript in preparation)</p>\n" +
+                         "</body>\n</html>\n")
+
     except IOError:
         frameinfo = getframeinfo(currentframe())
         print('Error in file ' + frameinfo.filename + ' at line ' +
@@ -1314,14 +1356,18 @@ if not args.add_track:
                                  "\nwindowingFunction Mean\nbigDataUrl " +
                                  args.short_label + ".gc5Base.bw\npriority 2\nautoScale Off\n" +
                                  "maxHeightPixels 128:36:16\ngraphTypeDefault Bar\ngridDefault OFF\n" +
-                                 "ncolor 0,0,0\naltColor 128,128,128\nviewLimits 30:70\nhtml ../documentation/gcPercent\n\n")
+                                 "ncolor 0,0,0\naltColor 128,128,128\nviewLimits 30:70\nhtml gcPercent.html\n\n")
     except IOError:
         frameinfo = getframeinfo(currentframe())
         print('Error in file ' + frameinfo.filename + ' at line ' +
-              str(frameinfo.lineno) + ': ' + "Failed to open file " + trackDb_file +
-              " for writing!")
+              str(frameinfo.lineno) + ': ' + "Failed to open file " +
+              trackDb_file + " for writing!")
         quit(1)
-
+    html_file = hub_dir + "gcPercent.html"
+    write_trackDescription(html_file, "gcPercent", "This GC-content track " +
+                           "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, "128,128,128")
     groups_txt_file = hub_dir + "groups.txt"
     try:
         with open(groups_txt_file, "w+") as groups_handle:
@@ -1353,12 +1399,14 @@ if not args.add_track:
                    ChromSizes_file, softmaskedBigBed_file)
         try:
             with open(trackDb_file, "a") as trackDb_handle:
-                visibility_counter, visibility = set_visibility(visibility_counter)
+                visibility_counter, visibility = set_visibility(
+                    visibility_counter)
                 trackDb_handle.write("track RMsoft\nlongLabel Softmaked Repeats\n" +
                                      "shortLabel Repeats\ngroup reps\ntype bigBed 3 .\n" +
                                      "bigDataUrl " + args.short_label +
                                      "_softmasking.bb\nvisibility " + visibililty + "\n" +
-                                     "color " + rgb_cols[col_idx] +
+                                     "color " + rgb_cols[col_idx] + "\n" +
+                                     "html RMsoft.html" +
                                      "\n\ngroup reps\ntype bigBed 3 .\n" +
                                      "bigDataUrl " + args.short_label +
                                      "_softmasking.bb\n" +
@@ -1372,6 +1420,12 @@ if not args.add_track:
                   str(frameinfo.lineno) + ': ' + "Failed to open file " +
                   trackDb_file + " for writing!")
             quit(1)
+        html_file = hub_dir + "RMsoft.html"
+        write_trackDescription(html_file, "RMsoft", "This repeat masking track " +
+                               "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                               "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>." +
+                               "Repeat information was automatically extracted from softmasked genome file.</p>",
+                               args.email, rgb_cols[col_idx])
 
 
 ''' check how many tracks are already visible in existing hub '''
@@ -1408,7 +1462,8 @@ if args.bam and args.display_bam_as_bam:
         run_simple_process(subprcs_args)
         try:
             with open(trackDb_file, "a") as trackDb_handle:
-                visibility_counter, visibility = set_visibility(visibility_counter)
+                visibility_counter, visibility = set_visibility(
+                    visibility_counter)
                 trackDb_handle.write("track RNASeq_" + str(bam_index) + "\n" +
                                      "bigDataUrl rnaseq_" + str(bam_index) +
                                      ".s.bam\n" +
@@ -1419,7 +1474,8 @@ if args.bam and args.display_bam_as_bam:
                                      bam_file +
                                      "\ngroup hints\nvisibility ")
                 trackDb_handle.write(visibility)
-                trackDb_handle.write("\ntype bam\n\n" +
+                trackDb_handle.write("\ntype bam\nhtml " + "RNASeq_" +
+                                     str(bam_index) + ".html\n\n" +
                                      "group hints\nbigDataUrl rnaseq_" +
                                      str(bam_index) + ".s.bam\n")
         except IOError:
@@ -1428,6 +1484,11 @@ if args.bam and args.display_bam_as_bam:
                   str(frameinfo.lineno) + ': ' + "Failed to open file " +
                   trackDb_file + " for writing!")
             quit(1)
+        html_file = hub_dir + "RNASeq_" + str(bam_index) + ".html"
+        write_trackDescription(html_file, "RNASeq_" + str(bam_index), "This RNA-Seq BAM track " +
+                               "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                               "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                               args.email, "None")
         bam_index = bam_index + 1
 
 
@@ -1475,7 +1536,8 @@ if args.bam:
         print("Writing to track db")
         try:
             with open(trackDb_file, "a") as trackDb_handle:
-                visibility_counter, visibility = set_visibility(visibility_counter)
+                visibility_counter, visibility = set_visibility(
+                    visibility_counter)
                 trackDb_handle.write("track RNASeq_wig_" + str(bam_index)
                                      + "\n" + "type bigWig\n" +
                                      "bigDataUrl rnaseq_" + str(bam_index) +
@@ -1486,7 +1548,8 @@ if args.bam:
                                      str(bam_index) + " from bam file " +
                                      bam_file + "\ncolor " + rgb_cols[col_idx] +
                                      "\nyLineOnOff on\nyLineMark 0\ngridDefault on\nvisibility ")
-                trackDb_handle.write(visibility)
+                trackDb_handle.write(
+                    visibility + "\nhtml " + "RNASeq_wig_" + str(bam_index) + ".html")
                 trackDb_handle.write("\n\ngroup hints\ntype bigWig\nbigDataUrl rnaseq_" +
                                      str(bam_index) + ".bw\ncolor " + rgb_cols[col_idx] + "\n\n")
                 col_idx = col_idx + 1
@@ -1498,7 +1561,11 @@ if args.bam:
                   str(frameinfo.lineno) + ': ' + "Failed to open file " +
                   trackDb_file + " for writing!")
             quit(1)
-
+        html_file = hub_dir + "RNASeq_wig_" + str(bam_index) + ".html"
+        write_trackDescription(html_file, "RNASeq_wig_" + str(bam_index), "This RNA-Seq WIG track " +
+                               "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                               "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                               args.email, rgb_cols[col_idx])
         bam_index = bam_index + 1
 
 
@@ -1512,6 +1579,11 @@ if args.annot:
     visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "annot",
                    "Reference Annotation", rgb_cols[col_idx], visibility)
+    html_file = hub_dir + "annot.html"
+    write_trackDescription(html_file, "annot", "This gene prediction track with reference annotation " +
+                           "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, rgb_cols[col_idx])
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1525,6 +1597,11 @@ if args.genemark:
     visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, args.genemark, ChromSizes_file, "genemark",
                    "GeneMark predictions", rgb_cols[col_idx], visibility)
+    html_file = hub_dir + "genemark.html"
+    write_trackDescription(html_file, "genemark", "This gene prediction track with GeneMark-ES/ET predictions " +
+                           "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, rgb_cols[col_idx])
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1542,6 +1619,11 @@ if args.aug_ab_initio:
                    "aug_ab_initio_no_utr",
                    "AUGUSTUS ab initio predictions without UTRs",
                    rgb_cols[col_idx], visibility)
+    html_file = hub_dir + "aug_ab_initio_no_utr.html"
+    write_trackDescription(html_file, "aug_ab_initio_no_utr", "This gene prediction track with AUGUSTUS <i>ab initio</i> predictions (without UTRs) " +
+                           "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, rgb_cols[col_idx])
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1559,6 +1641,11 @@ if args.aug_hints:
                    "aug_hints_no_utr",
                    "AUGUSTUS predictions with hints without UTRs",
                    rgb_cols[col_idx], visibility)
+    html_file = hub_dir + "aug_hints_no_utr.html"
+    write_trackDescription(html_file, "aug_hints_no_utr", "This gene prediction track with AUGUSTUS predictions with hints (without UTRs) " +
+                           "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, rgb_cols[col_idx])
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1576,6 +1663,11 @@ if args.aug_ab_initio_utr:
                    "aug_ab_initio_utr",
                    "AUGUSTUS ab initio predictions with UTRs",
                    rgb_cols[col_idx], visibility)
+    html_file = hub_dir + "aug_ab_initio_utr.html"
+    write_trackDescription(html_file, "aug_ab_initio_utr", "This gene prediction track with AUGUSTUS <i>ab initio</i> predictions with UTRs " +
+                           "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, rgb_cols[col_idx])
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1592,6 +1684,11 @@ if args.aug_hints_utr:
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "aug_hints_utr",
                    "AUGUSTUS predictions with hints and UTRs",
                    rgb_cols[col_idx], visibility)
+    html_file = hub_dir + "aug_hints_utr.html"
+    write_trackDescription(html_file, "aug_hints_utr", "This gene prediction track with AUGUSTUS predictions with hints and UTRs" +
+                           "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, rgb_cols[col_idx])
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1610,6 +1707,11 @@ if args.gemoma_filtered_predictions:
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "gemoma_filtered_predictions",
                    "Gemoma filtered predictions",
                    rgb_cols[col_idx], visibility)
+    html_file = hub_dir + "gemoma.html"
+    write_trackDescription(html_file, "gemoma", "This gene prediction track with Gemoma predictions " +
+                           "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, rgb_cols[col_idx])
     col_idx = col_idx + 1
     if col_idx > 25:
         col_idx = 0
@@ -1643,6 +1745,11 @@ if args.gene_track:
     visibility_counter, visibility = set_visibility(visibility_counter)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, args.gene_track[1],
                    args.gene_track[1], rgb_cols[col_idx], visibility)
+    html_file = hub_dir + args.gene_track[1] + ".html"
+    write_trackDescription(html_file, args.gene_track[1], "This gene prediction track was added to the assembly hub as <i>general gene track with custom label</i>. " +
+                           "It was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                           "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                           args.email, rgb_cols[col_idx])
     col_idx = col_idx + 1
     if col_idx > 25:
         col_dix = 0
@@ -1728,6 +1835,12 @@ if args.maker_gff:
             visibility_counter, visibility = set_visibility(visibility_counter)
             info_to_trackDB(trackDb_file, feature + "_maker", "Evidence by MAKER from source " + feature, rgb_cols[col_idx],
                             "makerEvidence", 12, visibility)
+            html_file = hub_dir + feature + "_maker" + ".html"
+            write_trackDescription(html_file, feature + "_maker", "This gene prediction track was added to the assembly hub with the argument <i>--maker_gff MAKER_GFF</i>. " +
+                                   "It was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                                   "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                                   args.email, rgb_cols[col_idx])
+
             col_idx = col_idx + 1
             if col_idx > 25:
                 col_idx = 0
@@ -1864,6 +1977,13 @@ if args.hints:
                             str(hint_file_no), "Hints of type " + h_type +
                             " from source " + h_src, rgb_cols[col_idx],
                             "hints", 12, visibility)
+            html_file = hub_dir + h_src + "_" + h_type + \
+                "_hints_" + str(hint_file_no) + ".html"
+            write_trackDescription(html_file, h_src + "_" + h_type + "_hints_" +
+                                   str(hint_file_no), "This AUGUSTUS hints track was added to the assembly hub " +
+                                   "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+                                   "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
+                                   args.email, rgb_cols[col_idx])
             col_idx = col_idx + 1
             if col_idx > 25:
                 col_idx = 0
