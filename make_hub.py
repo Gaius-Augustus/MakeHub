@@ -1238,6 +1238,29 @@ def write_trackDescription(outfile, track_name, short_method, email, track_color
         quit(1)
 
 
+''' Function that determines index of bam entries in trackDb file (if present) 
+    will use index of bw files, not bam files, in case both are present '''
+
+def find_bam_index(trackDb):
+    bam_index = 1
+    if os.path.isfile(trackDb):
+        try:
+            with open(trackDb, "r") as db_handle:
+                for line in db_handle:
+                    if re.search(r'rnaseq_\d+.bw', line):
+                        re_result = re.search(
+                            r'rnaseq_(\d+).bw', line).groups()
+                        bam_index = int(re_result[0]) + 1
+                        pass
+        except IOError:
+            frameinfo = getframeinfo(currentframe())
+            print('Error in file ' + frameinfo.filename + ' at line ' +
+                  str(frameinfo.lineno) + ': ' + "Failed to open file " +
+                  trackDb + " for reading!")
+            quit(1)
+    return bam_index
+
+
 ''' ******************* END FUNCTIONS ***************************************'''
 
 ''' Globally required files '''
@@ -1458,7 +1481,7 @@ if args.add_track:
 
 if args.bam and args.display_bam_as_bam:
     print('Generating BAM track(s)...')
-    bam_index = 1
+    bam_index = find_bam_index(trackDb_file)
     for bam_file in args.bam:
         bam_sorted_file = hub_dir + "rnaseq_" + str(bam_index) + \
             ".s.bam"
@@ -1505,27 +1528,13 @@ if args.bam and args.display_bam_as_bam:
 
 if args.bam:
     print('Generating bigWig RNA-Seq track(s) from BAM...')
-    bam_index = 1
-    if os.path.isfile(trackDb_file):
-        try:
-            with open(trackDb_file, "r") as db_handle:
-                for line in db_handle:
-                    if re.search(r'rnaseq_\d+.bw', line):
-                        re_result = re.search(
-                            r'rnaseq_(\d+).bw', line).groups()
-                        bam_index = int(re_result[0]) + 1
-                        pass
-        except IOError:
-            frameinfo = getframeinfo(currentframe())
-            print('Error in file ' + frameinfo.filename + ' at line ' +
-                  str(frameinfo.lineno) + ': ' + "Failed to open file " +
-                  trackDb_file + " for reading!")
-            quit(1)
+    bam_index = find_bam_index(trackDb_file)
     for bam_file in args.bam:
-        bam_sorted_file = tmp_dir + "rnaseq_" + str(bam_index) + ".s.bam"
-        subprcs_args = [samtools, "sort", "-@",
+        bam_sorted_file = hub_dir + "rnaseq_" + str(bam_index) + ".s.bam"
+        if not args.display_bam_as_bam:
+            subprcs_args = [samtools, "sort", "-@",
                         str(args.cores), bam_file, "-o", bam_sorted_file]
-        run_simple_process(subprcs_args)
+            run_simple_process(subprcs_args)
         wig_file = tmp_dir + "rnaseq_" + str(bam_index) + ".wig"
         if bam2wig_aug is True:
             bam2wig(bam_sorted_file, wig_file, ChromSizes_file)
