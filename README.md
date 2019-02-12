@@ -12,6 +12,7 @@ Contents
 
 -   [What is MakeHub?](#what-is-makehub)
 -   [Installation](#installation)
+    -   [Quick start](#quick-start)
     -   [Dependencies](#dependencies)
     -   [MakeHub](#makehub)
 -   [Data preparation](#data-preparation)
@@ -30,11 +31,11 @@ Contents
 What is MakeHub?
 ================
 
-MakeHub is a command line tool for the fully automatic generation
-of track data hubs[^fn1] for visualizing genomes with the UCSC genome
-browser[^fn2]. Track data hubs are data structures that contain all 
-required information about a genome for visualizing with the UCSC 
-genome browser.
+MakeHub is a command line tool for the fully automatic generation of
+of track data hubs<sup name="a1">[1](#f1)</sup> for visualizing genomes
+with the UCSC genome browser<sup name="a2">[2](#f2)</sup>. Track data
+hubs are data structures that contain all required information about
+a genome for visualizing with the UCSC genome browser.
 
 Assembly  hubs need to be hosted on a publicly available webspace
 (that might be user/password protected) for usage with the UCSC
@@ -44,13 +45,14 @@ MakeHub is implemented in Python3 and automatically executes tools
 provided by UCSC for generation of assembly hubs
 (<http://hgdownload.soe.ucsc.edu/admin/exe>) on Linux and MacOS X
 x86_64 computers. For visualization of RNA-Seq alignment
-data from BAM files, MakeHub uses Samtools [^fn3]. If installed,
-the AUGUSTUS [^fn4] tool bam2wig is used to speed up BAM to
-wig format conversion (<https://github.com/Gaius-Augustus/Augustus>),
-which is otherwise performed without bam2wig.
+data from BAM files, MakeHub uses Samtools<sup name="a3">[3](#f3)</sup>].
+If installed, the AUGUSTUS<sup name="a4">[4](#f4)</sup> tool bam2wig is
+used to speed up BAM to wig format conversion
+(<https://github.com/Gaius-Augustus/Augustus>), which is otherwise
+performed without bam2wig.
 
 MakeHub can either be used to create entirely new assembly hubs,
-or it can be used to add tracks to hubs that were previously created 
+or it can be used to add tracks to hubs that were previously created
 by MakeHub.
 
 For display by the UCSC Genome Browser, assembly hubs need to be
@@ -59,15 +61,26 @@ hosted on a publicly accessible web server.
 Installation
 ============
 
-In the following, we provide instructions for installing MakeHub
-on Linux or MacOS X with x86_64 architecture.
+Quick Start
+-----------
+
+MakeHub is a Python3 script for Linux or MacOS X with x86-64
+architecture. It requires Python3, Biopython, gzip, sort and
+- in the case that BAM files are provided - samtools, and optionally
+the AUGUSTUS tool bam2hints.
+
+Many users who create the input data for MakeHub, e.g. with BRAKER
+<sup name="a5">[5](#f5)</sup>, have the required dependencies
+already installed on their system and my thus skip ahead to section
+[Running MakeHub](#running-makehub). In case of doubt, read the
+following sections about installation of Dependencies and MakeHub
+installation.
+
 
 Dependencies
 ------------
 
-MakeHub is a Python3 script. It requires Python3, Biopython and
-- in the case that BAM files are provided - samtools, gzip, sort,
-and optionally the AUGUSTUS tool bam2hints. In the following, we
+In the following, we
 give instructions on where dependencies can be obtained, and
 how they may be installed on Ubuntu Linux.
 
@@ -190,7 +203,9 @@ MakeHub accepts files in the following formats:
 * BAM file(s) with RNA-Seq to genome alignments
 * gene prediction file(s) in GTF-format, e.g. from BRAKER
 * AUGUSTUS hints files in BRAKER-specific GFF hints format
-* Gene prediction files in GFF3-format from MAKER and Gemoma
+* Gene prediction files in GFF3-format from MAKER
+  <sup name="a6">[6](#f6)</sup> and Gemoma
+  <sup name="a7">[7](#f7)</sup>
 
 
 
@@ -249,7 +264,7 @@ about the genome, such as the GC-content, restriction enzyme sites and
 repeat masking segments.
 
 If you want to visualize the result, connect the following hub with the
-UCSC genome browser (see section 
+UCSC genome browser (see section
 [How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
 <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi1/hub.txt>
 
@@ -271,6 +286,24 @@ UCSC genome browser (see section
 [How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
 <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi2/hub.txt>
 
+Usage example 4:
+
+```
+make_hub.py -l hmi4 -L "Rodent tapeworm" -g data/genome.fa -e \
+  katharina.hoff@uni-greifswald.de -a data/annot.gtf -b data/rnaseq.bam \
+  -d -X data -M data/maker.gff -E data/gemoma.gff \
+  -N "Hymenolepsis microstoma" -V GCA_000469805.2
+```
+
+In comparison to the first two examples, the resulting hub has a large
+number of evidence and gene prediction tracks from BRAKER, MAKER and
+Gemoma.
+
+If you want to visualize the result, connect the following hub with the
+UCSC genome browser (see section
+[How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
+<http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi4/hub.txt>
+
 Adding tracks to existing hub
 -----------------------------
 
@@ -283,14 +316,14 @@ add - are:
 
 * ```-e EMAIL```, ```--email EMAIL```
   Contact e-mail adress for assembly
-  hub. 
+  hub.
 
 
 * ```-l SHORT_LABEL```, ```--short_label SHORT_LABEL```
   Short label (without whitespaces and special characters) for identifying 
   assembly hub.
 
-* ```-A```, ```--add_track```       
+* ```-A```, ```--add_track```
   Add track(s) to existing hub
 
 Usage example 3:
@@ -409,7 +442,7 @@ In the following, we explain all options of make_hub.py
      * ```-x AUG_HINTS, --aug_hints AUG_HINTS```
      * ```-y AUG_AB_INITIO_UTR, --aug_ab_initio_utr AUG_AB_INITIO_UTR```
      * ```-z AUG_HINTS_UTR, --aug_hints_utr AUG_HINTS_UTR```
-     
+
 * ```-i HINTS, --hints HINTS```
   GFF file with BRAKER hints (AUGUSTUS-specific GFF format of BRAKER).
 
@@ -502,19 +535,6 @@ It consists of the following files:
  predictions as evidence, and GeneMark-ES/ET predictions with
  BRAKER-trained parameters.
 
-Usage example 4:
-
-```
-make_hub.py -l hmi4 -L "Rodent tapeworm" -g data/genome.fa -e \
-  katharina.hoff@uni-greifswald.de -a data/annot.gtf -b data/rnaseq.bam \
-  -d -X data -M data/maker.gff -E data/gemoma.gff \
-  -N "Hymenolepsis microstoma" -V GCA_000469805.2
-```
-
-If you want to visualize the result, connect the following hub with the
-UCSC genome browser (see section
-[How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
-<http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi4/hub.txt>
 
 Output of MakeHub
 =================
@@ -591,19 +611,29 @@ License
 All source code is under GNU public license 3.0 (see
 <https://www.gnu.org/licenses/gpl-3.0.de.html>).
 
+References
+==========
 
+<b id="f1">[1]</b> Raney BJ, Dreszer TR, Barber GP, Clawson H, Fujita PA, Wang T, Nguyen N, Paten B, Zweig AS, Karolchik D, Kent WJ. 2014.
+“Track Data Hubs.” *Bioinformatics* 1;30(7):1003-5.[↩](#a1)
 
-[^fn1]: Raney BJ, Dreszer TR, Barber GP, Clawson H, Fujita PA, Wang T, Nguyen N, Paten B, Zweig AS, Karolchik D, Kent WJ. 2014.
-“Track Data Hubs.” *Bioinformatics* 1;30(7):1003-5.
+<b id="f2">[2]</b> Kent WJ, Sugnet CW, Furey TS, Roskin KM, Pringle TH, Zahler AM, Haussler D. 2002.
+“UCSC Genome Browser.” *Genome Res.* 12(6):996-1006.[↩](#a2)
 
-[^fn2]: Kent WJ, Sugnet CW, Furey TS, Roskin KM, Pringle TH, Zahler AM, Haussler D. 2002.
-“UCSC Genome Browser.” *Genome Res.* 12(6):996-1006.
+<b id="f3">[3]</b> Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R. 2009.
+“The sequence alignment/map format and SAMtools.” *Bioinformatics* 26(16):2078-2079.[↩](#a3)
 
-[^fn3]: Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R. 2009.
-“The sequence alignment/map format and SAMtools.” *Bioinformatics* 26(16):2078-2079.
+<b id="f4">[4]</b> Stanke M, Diekhans M, Baertsch R, Haussler D. 2008.
+“Using native and syntenically mapped cDNA alignments to improve de novo gene finding.” *Bioinformatics* 24(5):637-644.[↩](#a4)
 
-[^fn4]: Stanke M, Diekhans M, Baertsch R, Haussler D. 2008.
-“Using native and syntenically mapped cDNA alignments to improve de novo gene finding.” *Bioinformatics* 24(5):637-644
+<b id="f5">[5]</b> Hoff KJ, Lange S, Lomsadze A, Borodovsky M, Stanke M. 2015.
+“BRAKER1: unsupervised RNA-Seq-based genome annotation with GeneMark-ET and AUGUSTUS.” *Bioinformatics* 32(5), 767-769.[↩](#a5)
+
+<b id="f6">[6]</b> Holt C, Yandell M. 2011. 
+“MAKER2: an annotation pipeline and genome-database management tool for second-generation genome projects.” *BMC Bioinformatics* 12(1), 491.[↩](#a6)
+
+<b id="f7">[7]</b> Keilwagen J, Hartung F, Paulini M, Twardziok SO, Grau J. 2018.
+“Combining RNA-seq data and homology-based gene prediction for plants, animals and fungi.” *BMC Bioinformatics* 19(1), 189.[↩](#a7)
 
 
 
