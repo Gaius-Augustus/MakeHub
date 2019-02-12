@@ -14,16 +14,16 @@ Contents
 -   [Installation](#installation)
     -   [Dependencies](#dependencies)
     -   [MakeHub](#makehub)
--   [Data preparation](#preparation)
+-   [Data preparation](#data-preparation)
 -   [Running MakeHub](#running-makehub)
-    -   [Creating a new hub](#creating-new-hub)
-    -   [Adding tracks to existing hub](#adding_tracks)
-    -   [Options explained](#options_explained)
--   [Example data](#example_data)
+    -   [Creating a new hub](#creating-a-new-hub)
+    -   [Adding tracks to existing hub](#adding-tracks-to-existing-hub)
+    -   [Options explained](#options-explained)
+-   [Example data](#example-data)
 -   [Output of MakeHub](#output-of-makehub)
--   [How to use MakeHub output with UCSC Genome Browser](#use_makehub)
+-   [How to use MakeHub output with UCSC Genome Browser](#how-to-use-makehub-output-with-ucsc-genome-browser)
 -   [Bug reporting](#bug-reporting)
--   [Citing MakeHub](#citingmakehub)
+-   [Citing MakeHub](#citing-makehub)
 -   [License](#license)
 
 
@@ -56,13 +56,13 @@ by MakeHub.
 For display by the UCSC Genome Browser, assembly hubs need to be
 hosted on a publicly accessible web server.
 
-Installation {#installation}
+Installation
 ============
 
 In the following, we provide instructions for installing MakeHub
 on Linux or MacOS X with x86_64 architecture.
 
-Dependencies {#dependencies}
+Dependencies
 ------------
 
 MakeHub is a Python3 script. It requires Python3, Biopython and
@@ -150,7 +150,7 @@ Please follow the compilation instructions in
 Augustus/auxprogs/bam2wig/README.txt in case the default
 make command fails.
 
-MakeHub {#makehub}
+MakeHub
 -------
 
 MakeHub is a python3 script named make_hub.py. It does not require
@@ -176,7 +176,7 @@ make_hub.py
 
 from  any location on your computer.
 
-Data Preparation {#preparation}
+Data Preparation
 ==================
 
 MakeHub accepts files in the following formats:
@@ -194,13 +194,13 @@ MakeHub accepts files in the following formats:
 
 
 
-Running MakeHub {#running-makehub}
+Running MakeHub
 ===============
 
 MakeHub can be used either to create new assembly hubs, or to add
 tracks to assembly hubs that had previously been created.
 
-Creating a new hub {#creating-new-hub}
+Creating a new hub
 ------------------
 
 The essential arguments for creating a new assembly hub are:
@@ -271,7 +271,7 @@ UCSC genome browser (see section
 [How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
 <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi2/hub.txt>
 
-Adding tracks to existing hub {#adding_tracks}
+Adding tracks to existing hub
 -----------------------------
 
 If a hub already exists, you may add tracks to this existing hub
@@ -327,7 +327,7 @@ UCSC genome browser (see section
 [How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
 <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi3/hub.txt>
 
-Options explained {#options_explained}
+Options explained
 -----------------
 
 In the following, we explain all options of make_hub.py
@@ -450,20 +450,20 @@ In the following, we explain all options of make_hub.py
   Output directory to write hub to (default is the current working directory).
   This directory must be writable.
 
-* ```-r, --no_tmp_rm```      
+* ```-r, --no_tmp_rm```
   Do not delete temporary files (e.g. for debugging purposes).
-  
+
 * ```-v VERBOSITY, --verbosity VERBOSITY```
-  If INT VERBOSITY > 0, verbose logging output is produced (e.g. for 
+  If INT VERBOSITY > 0, verbose logging output is produced (e.g. for
   debugging purposes).
 
-Example data {#example_data}
+Example data
 ============
 
-Example data is located in the directory ```data/```. 
+Example data is located in the directory ```data/```.
 It consists of the following files:
 
-* ```genome.fa```: sequence LN902858_1 of *Hymenolepis microstoma*, 
+* ```genome.fa```: sequence LN902858_1 of *Hymenolepis microstoma*,
   assembly version GCA_000469805.2 from GenBank.
 
 * ```rnaseq.fa```: RNA-Seq reads of library ERR337976 that
@@ -472,27 +472,27 @@ It consists of the following files:
 * ```annot.gtf```: NCBI reference annotation of scaffold LN902858_1.
 
 * ```augustus.ab_initio.gtf```: AUGUSTUS *ab inito* gene predictions
-  from a BRAKER run (run was performed on the complete genome, 
-  predictions corresponding to LN902858_1 were extracted) with 
+  from a BRAKER run (run was performed on the complete genome,
+  predictions corresponding to LN902858_1 were extracted) with
   Hisat2 alignments from RNA-Seq library ERR337976.
 
 * ```augustus.hints.gtf```: AUGUSTUS gene predictions with hints
-  from a BRAKER run (run was performed on the complete genome, 
-  predictions corresponding to LN902858_1 were extracted) with 
+  from a BRAKER run (run was performed on the complete genome,
+  predictions corresponding to LN902858_1 were extracted) with
   Hisat2 alignments from RNA-Seq library ERR337976.
 
 * ```GeneMark-ET/genemark.gtf```: GeneMark-ES/ET predictions
-  from a BRAKER run (run was performed on the complete genome, 
-  predictions corresponding to LN902858_1 were extracted) with 
+  from a BRAKER run (run was performed on the complete genome,
+  predictions corresponding to LN902858_1 were extracted) with
   Hisat2 alignments from RNA-Seq library ERR337976.
 
-* ```hintsfile.gff```: Hints from a BRAKER run (run was performed 
-  on the complete genome, hints corresponding to LN902858_1 were 
+* ```hintsfile.gff```: Hints from a BRAKER run (run was performed
+  on the complete genome, hints corresponding to LN902858_1 were
   extracted) with Hisat2 alignments from RNA-Seq library ERR337976.
 
 * ```gemoma.gff```: Gemoma predictions from a Gemoma run with
  Hisat2 alignments from RNA-Seq library ERR337976 and proteins of
- *Echinococcus multilocularis*. (Run was performed on the complete 
+ *Echinococcus multilocularis*. (Run was performed on the complete
  genome, predictions corresponding to LN902858_1 were extracted)
 
 * ```maker.gff```: MAKER2 predictions from a run with BRAKER
@@ -516,7 +516,7 @@ UCSC genome browser (see section
 [How to use MakeHub output with UCSC Genome Browser](#use_makehub)):
 <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi4/hub.txt>
 
-Output of MakeHub {#output-of-makehub}
+Output of MakeHub
 =================
 
 make_hub.py produces a directory that is called identical to the
@@ -547,7 +547,7 @@ Importantly, ```species``` also contains ```*.html``` files for all
 tracks. These files should be edited, manually, to contain meaningful
 information!
 
-How to use MakeHub output with UCSC Genome Browser {#use_makehub}
+How to use MakeHub output with UCSC Genome Browser
 ==================================================
 
 Copy the complete hub folder (e.g. ```species```) to a publicly
@@ -558,7 +558,7 @@ Go to <https://genome.ucsc.edu/index.html>, click on ```My Data```
 publicly available ```hub.txt``` file  into the URL window.
 Subsequently, click on ```Add Hub```.
 
-Bug reporting {#bug-reporting}
+Bug reporting
 =============
 
 Before reporting bugs, please check that you are using the most recent
@@ -580,12 +580,12 @@ STDOUT. Please let us know at which step and with what
 error message make_hub.py caused problems.
 
 
-Citing MakeHub {#citingmakehub}
+Citing MakeHub
 ==============
 
 Hoff KJ, https://github.com/Gaius-Augustus/MakeHub (manuscript is in preparation)
 
-License {#license}
+License
 =======
 
 All source code is under GNU public license 3.0 (see
