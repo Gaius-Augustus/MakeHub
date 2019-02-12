@@ -34,7 +34,7 @@ except ImportError:
 
 __author__ = "Kathairna J. Hoff"
 __copyright__ = "Copyright 2019. All rights reserved."
-__credits__ = []
+__credits__ = "Mario Stanke"
 __license__ = "Artistic Licsense"
 __version__ = "1.0"
 __email__ = "katharina.hoff@uni-greifswald.de"
@@ -1940,9 +1940,9 @@ if args.hints:
                                 else:
                                     mult = 1
                                 hints_handle.write(seq + "\t" + start + "\t" +
-                                                   end + "\t" + h_type + "_" +
+                                                   end + "\t" +
                                                    str(hint_no) + "_mult_" +
-                                                   str(mult) + "_strand_" +
+                                                   str(mult) + "_" +
                                                    strand + "\t1\t" + strand +
                                                    "\t" + start + "\t" + end +
                                                    "\t0\t1\t" +
