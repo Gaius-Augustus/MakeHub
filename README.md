@@ -27,7 +27,7 @@ Contents
 -   [License](#license)
 
 
-What is MakeHub? {#what-is-makehub}
+What is MakeHub?
 ================
 
 MakeHub is a command line tool for the fully automatic generation
