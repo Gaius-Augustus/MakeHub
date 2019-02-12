@@ -58,6 +58,9 @@ by MakeHub.
 For display by the UCSC Genome Browser, assembly hubs need to be
 hosted on a publicly accessible web server.
 
+![MakeHub pipeline illustration.\[make_hub\]](docs/pipeline.pdf)
+
+
 Installation
 ============
 
