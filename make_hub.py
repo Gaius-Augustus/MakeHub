@@ -3,7 +3,7 @@
 # WARNINGS:
 #
 # 1) Display of hints has been adapted to BRAKER1 hints format
-# 2) This script retrieves the binaries for linux and os x64 bit systems. It 
+# 2) This script retrieves the binaries for linux and os x64 bit systems. It
 #    will not work on other architectures and systems unless the required
 #    UCSC tool binaries are already present.
 
@@ -138,13 +138,12 @@ if args.verbosity > 3:
 
 if args.printUsageExamples:
     print("\nUsage example for generating a novel hub:\n")
-    print("make_hub.py -e me@anonymous.de -g genome.fa -L " +
-          "\"My species name hub\" -l species -a annot.gtf --hints " +
-          "intron.hints --bam this1.bam this2.bam -v 1 --genemark genemark.gtf\n")
+    print("make_hub.py -l hmi2 -L \"Rodent tapeworm\" -g data/genome.fa -e " +
+          "anonymous@anonymous.de -a data/annot.gtf -b data/rnaseq.bam -d\n\n")
     print("Usage example for adding a gene prediction track to an existing " +
           "hub (hub resides in the directory where this command is executed):\n")
-    print("make_hub.py -l species --add_track " +
-          "--gene_track file.gtf novel_track_label\n")
+    print("make_hub.py -l hmi2 -e anonymous@anonymous.de -i data/hintsfile.gff " +
+          "-A -M data/maker.gff -X data\n")
     exit(1)
 
 
@@ -260,7 +259,7 @@ elif not os.access(args.outdir, os.W_OK):
           "(" + args.outdir + ") is not writable!")
     exit(1)
 
-tmp_dir = args.outdir + "/tmp/"
+tmp_dir = args.outdir + "/tmp-" + args.short_label + "/"
 hub_dir = args.outdir + "/" + args.short_label + \
     "/" + args.short_label + "/"
 
@@ -435,13 +434,14 @@ except OSError as e:
 
 ''' ******************* BEGIN FUNCTIONS *************************************'''
 
+
 def set_color(c, col_lst):
     if c <= 25:
         c = c+1
     else:
         c = 0
     return c, col_lst[c]
-    
+
 
 def set_visibility(v):
     if v < 10:
