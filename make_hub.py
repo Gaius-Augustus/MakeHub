@@ -125,11 +125,6 @@ parser.add_argument('-v', '--verbosity', required=False, type=int, default=0,
 args = parser.parse_args()
 
 
-if args.latin_name is None:
-    args.latin_name = args.long_label
-if args.assembly_version is None:
-    args.assembly_version = ""
-
 
 if args.verbosity > 3:
     print(args)
@@ -1323,8 +1318,15 @@ if not args.add_track:
               " for writing!")
         quit(1)
     about_file = args.outdir + "/" + args.short_label + "/aboutHub.html"
-    write_aboutHub(about_file, args.long_label,
-                   args.latin_name, args.assembly_version, args.email)
+    ass_vers = "";
+    if args.assembly_version is not None:
+        ass_vers = args.assembly_version
+    if args.latin_name is None:
+        write_aboutHub(about_file, args.long_label,
+                   args.long_label, ass_vers, args.email)
+    else:
+        write_aboutHub(about_file, args.long_label,
+                   args.latin_name, ass_vers, args.email)
 
     default_seq_id = ""
     default_seq_end = 0
