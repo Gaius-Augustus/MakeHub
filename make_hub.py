@@ -36,9 +36,9 @@ __author__ = "Kathairna J. Hoff"
 __copyright__ = "Copyright 2019. All rights reserved."
 __credits__ = "Mario Stanke"
 __license__ = "Artistic Licsense"
-__version__ = "1.0"
+__version__ = "1.0.2"
 __email__ = "katharina.hoff@uni-greifswald.de"
-__status__ = "development"
+__status__ = "production"
 
 ucsc_tools = {'bedToBigBed': '', 'genePredCheck': '', 'faToTwoBit': '',
               'gtfToGenePred': '', 'hgGcPercent': '', 'ixIxx': '',
