@@ -1764,7 +1764,7 @@ if args.traingenes:
     make_gtf_track(trackDb_file, args.traingenes, ChromSizes_file, "traingenes",
                    "Training genes", this_color, visibility)
     html_file = "traingenes.html"
-    write_trackDescription(html_file, args.gene_track[1], "This training gene track was added to the assembly hub by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
+    write_trackDescription(html_file, argstraingenes, "This training gene track was added to the assembly hub by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
                            "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
                            args.email, this_color)
 
