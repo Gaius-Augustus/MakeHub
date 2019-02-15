@@ -606,7 +606,7 @@ error message make_hub.py caused problems.
 Citing MakeHub
 ==============
 
-Hoff KJ, https://github.com/Gaius-Augustus/MakeHub (manuscript is in preparation)
+Hoff KJ, “MakeHub: Fully automated generation of UCSC Genome Browser Assembly Hubs.” *bioRxiv*: doi: https://doi.org/10.1101/550145 
 
 License
 =======
