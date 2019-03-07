@@ -88,7 +88,8 @@ give instructions on where dependencies can be obtained, and
 how they may be installed on Ubuntu Linux.
 
 Python3 is available from <https://www.python.org/downloads/>, or
-as package for many Unix systems.
+as package for many Unix systems. Choose version 3.5 or newer
+(because otherwise, subprocess module is not fully functional).
 
 For example, on Ubuntu, install Python3 with:
 
@@ -132,6 +133,13 @@ You may download these binaries and make them available in your
 $PATH. However, if you skip installing these tools, they will
 be downloaded during MakeHub execution, automatically.
 
+In rare cases, particularly on older x86_64 Unix systems, the
+UCSC tools might throw errors because they are not statically linked
+in all parts, i.e. they will try to use some old system libraries and
+crash. If you observe this, try downloading the sources of KentUtils
+from github. We have had the best experience with compiling Kent
+tools for MakeHub from <https://github.com/ENCODE-DCC/kentUtils/>.
+
 MakeHub uses Samtools for BAM file sorting and conversion. Samtools is
 avilable at <https://github.com/samtools/>. It is also avilable as
 package with many linux distributions.
@@ -142,8 +150,9 @@ For example, on ubuntu, install samtools with:
 sudo apt install samtools
 ```
 
-MakeHub has been tested with Samtools 1.8-20-g4ff8062. It might
-not be fully downward compatible with older versions.
+MakeHub has been tested with Samtools 1.8-20-g4ff8062. It is
+not fully downward compatible with older versions (we have
+for example tried samtools 1.1 and that is incompatible).
 
 MakeHub uses gzip for compressing wig files that were created
 from BAM files. gzip is available at <https://ftp.gnu.org/gnu/gzip/>.
