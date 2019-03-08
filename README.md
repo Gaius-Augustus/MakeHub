@@ -70,7 +70,7 @@ Quick Start
 MakeHub is a Python3 script for Linux or MacOS X with x86-64
 architecture. It requires Python3, Biopython, gzip, sort and - 
 in the case that BAM files are provided - samtools, and optionally
-the AUGUSTUS tool bam2hints.
+the AUGUSTUS tool bam2wig.
 
 Many users who create the input data for MakeHub, e.g. with BRAKER
 <sup name="a5">[5](#f5)</sup>, have the required dependencies
