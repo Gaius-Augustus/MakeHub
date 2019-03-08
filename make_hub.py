@@ -160,7 +160,6 @@ if ((args.email is None) or (args.genome is None) or (args.short_label is None))
 ''' Set args in case args.braker_out_dir is specified and they are otherwise unset '''
 
 if args.braker_out_dir:
-    print("I am in braker_out_dir")
     if re.search(r'[^/]$', args.braker_out_dir):
         args.braker_out_dir = args.braker_out_dir + "/"
     if os.path.isdir(args.braker_out_dir):
@@ -1943,9 +1942,9 @@ if args.hints:
                                     mult = 1
                                 hints_handle.write(seq + "\t" + start + "\t" +
                                                    end + "\t" +
-                                                   str(hint_no) + "_mult_" +
+                                                   "mult_" +
                                                    str(mult) + "_" +
-                                                   strand + "\t1\t" + strand +
+                                                   strand + "id_" + str(hint_no) + "\t1\t" + strand +
                                                    "\t" + start + "\t" + end +
                                                    "\t0\t1\t" +
                                                    str(int(end) - int(start)) +
