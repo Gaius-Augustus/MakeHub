@@ -120,6 +120,12 @@ parser.add_argument('-V', '--assembly_version', required=False, type=str,
                     "public UCSC list.")
 parser.add_argument('-r', '--no_tmp_rm', action='store_true',
                     help="Do not delete temporary files ")
+parser.add_argument('--no_genePredToBigGenePred', action='store_true', 
+                    help='Option for the special case in which the precompiled' +
+                    ' UCSC binaries are not working on your system, and you installed ' +
+                    'kentutils from the older ENCODE github repository; if activated, ' +
+                    'gene prediction tracks will be output to bigBed instead of bigGenePred ' +
+                    'format and amino acid display will not be possible in gene tracks.')
 parser.add_argument('-v', '--verbosity', required=False, type=int, default=0,
                     help="If INT>0 verbose output log is produced")
 args = parser.parse_args()
