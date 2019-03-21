@@ -45,13 +45,15 @@ ucsc_tools = {'bedToBigBed': '', 'genePredCheck': '', 'faToTwoBit': '',
               'twoBitInfo': '', 'wigToBigWig': '', 'genePredToBed': '',
               'genePredToBigGenePred': ''}
 
+ucsc_as_files = {'bigGenePred.as': None, 'cytoBand.as': None}
+
 augustus_tools = {'bam2wig': ''}
 
 parser = argparse.ArgumentParser(
     description='Generate UCSC assembly hub (e.g. from BRAKER or MAKER output).')
 parser.add_argument('-p', '--printUsageExamples', action='store_true',
                     help="Print usage examples for make_hub.py")
-parser.add_argument('-e', '--email', required=True, type=str,
+parser.add_argument('-e', '--email', required=False, type=str,
                     help='Contact e-mail adress for assembly hub')
 parser.add_argument('-g', '--genome', required=False, type=str,
                     help='Genome fasta file (possibly softmasked)')
@@ -59,7 +61,7 @@ parser.add_argument('-L', '--long_label', required=False, type=str,
                     help='Long label for hub, e.g. species name in english ' +
                     'and latin, pass in single quotation marks, e.g. ' +
                     '--long_label \'Dorosphila melanogster (fruit fly)\'')
-parser.add_argument('-l', '--short_label', required=True, type=str,
+parser.add_argument('-l', '--short_label', required=False, type=str,
                     help='Short label for hub, will also be used as ' +
                     'directory name for hub, should not contain spaces or ' +
                     'special characters, e.g. --short_label fly')
@@ -121,7 +123,7 @@ parser.add_argument('-V', '--assembly_version', required=False, type=str,
                     "public UCSC list.")
 parser.add_argument('-r', '--no_tmp_rm', action='store_true',
                     help="Do not delete temporary files ")
-parser.add_argument('--no_genePredToBigGenePred', action='store_true', 
+parser.add_argument('--no_genePredToBigGenePred', action='store_true',
                     help='Option for the special case in which the precompiled' +
                     ' UCSC binaries are not working on your system, and you installed ' +
                     'kentutils from the older ENCODE github repository; if activated, ' +
@@ -130,7 +132,6 @@ parser.add_argument('--no_genePredToBigGenePred', action='store_true',
 parser.add_argument('-v', '--verbosity', required=False, type=int, default=0,
                     help="If INT>0 verbose output log is produced")
 args = parser.parse_args()
-
 
 
 if args.verbosity > 3:
@@ -147,6 +148,10 @@ if args.printUsageExamples:
     print("make_hub.py -l hmi2 -e anonymous@anonymous.de -i data/hintsfile.gff " +
           "-A -M data/maker.gff -X data\n")
     exit(1)
+else:
+    if args.email is None or args.short_label is None:
+        print("Error: the following arguments are required: -e/--email, -l/--short_label")
+        exit(1)
 
 
 ''' Check whether sufficient options have been provided '''
@@ -435,6 +440,46 @@ try:
 except OSError as e:
     if e.errno != errno.EEXIST:
         raise
+
+
+''' When UCSC tools are present, also check for the *.as files or obtain them;
+store the as files either make_hub.py directory if it is writable, otherwise
+store in temporary hub directory '''
+
+as_url = 'http://genome.ucsc.edu/goldenPath/help/examples/'
+for key, val in ucsc_as_files.items():
+    if ((not args.no_genePredToBigGenePred) and (key == 'BigGenePred.as')) or (key != 'BigGenePred.as'):
+        as_dir = os.path.dirname(os.path.realpath(__file__))
+        if os.path.isfile(as_dir + '/' + key):
+            ucsc_as_files[key] = as_dir + '/' + key
+        elif os.path.isfile(tmp_dir + '/' + key):
+            ucsc_as_files[key] = tmp_dir + '/' + key
+        else:
+            print("Was unable to locate file " + key + " in " + as_dir + " and " +
+                  tmp_dir + ", will try to download it from " + as_url + "...")
+            if (not os.access(as_dir, os.W_OK)) and os.access(tmp_dir, os.W_OK):
+                as_dir = tmp_dir
+            elif (not os.access(as_dir, os.W_OK)) and (not os.access(tmp_dir, os.W_OK)):
+                print('Error: neither ' + as_dir + " nor " +
+                      tmp_dir + " are writable directories.")
+                exit(1)
+            ucsc_as_files[key] = as_dir + '/' + key
+            print("Trying to download " + as_url + key +
+                  " and store into " + ucsc_as_files[key])
+            try:
+                with urllib.request.urlopen(as_url + key) as response, open(ucsc_as_files[key], 'wb') as out_file:
+                    shutil.copyfileobj(response, out_file)
+                print("Stored file at " + ucsc_as_files[key] + ".")
+            except:
+                frameinfo = getframeinfo(currentframe())
+                print('Error in file ' + frameinfo.filename + ' at line ' +
+                    str(frameinfo.lineno) + ": Downloading file " + key + 
+                      " failed. If your " +
+                      "machine does not have internet access, you may " + 
+                      "manually download the file from " + as_url + key + 
+                      " and store it in the directory where make_hub.py " +
+                      "resides.")
+
 
 ''' ******************* BEGIN FUNCTIONS *************************************'''
 
@@ -795,15 +840,21 @@ def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group, bed
 ''' Function that converts gtf to gene prediction track '''
 
 
-def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_label, rgb_color, visibility):
+def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_label, rgb_color, visibility, no_genePredToBigGenePredFlag):
     gp_file = tmp_dir + short_label + ".gp"
     info_out_file = tmp_dir + short_label + ".infoOut.txt"
     bed_file = tmp_dir + short_label + ".bed"
     bb_file = hub_dir + short_label + ".bb"
-    gtf2bb(gtf_file, gp_file, bed_file, bb_file,
-           info_out_file, chrom_size_file, sort_tool)
-    info_to_trackDB(trackDb_file, short_label, long_label,
-                    rgb_color, "genePreds", 12, visibility)
+    if no_genePredToBigGenePredFlag is True:
+        gtf2bb(gtf_file, gp_file, bed_file, bb_file,
+               info_out_file, chrom_size_file, sort_tool)
+        info_to_trackDB(trackDb_file, short_label, long_label,
+                        rgb_color, "genePreds", 12, visibility)
+    else:
+        # PUT CODE FOR bigGenePred FORMAT HERE!!! THIS IS WHERE I AM!
+        gtf2bgpbb(gtf_file, gp_file, bed_file, info_out_file, chrom_size_file,
+                  sort_tool)
+        info_to_trackDB()
     # parse info_out_file to produce txt file for creating nameIndex files
     name_index_txt_file = tmp_dir + short_label + ".nameIndex.txt"
     try:
@@ -1245,6 +1296,7 @@ def write_trackDescription(outfile, track_name, short_method, email, track_color
 ''' Function that determines index of bam entries in trackDb file (if present) 
     will use index of bw files, not bam files, in case both are present '''
 
+
 def find_bam_index(trackDb):
     bam_index = 1
     if os.path.isfile(trackDb):
@@ -1327,15 +1379,15 @@ if not args.add_track:
               " for writing!")
         quit(1)
     about_file = args.outdir + "/" + args.short_label + "/aboutHub.html"
-    ass_vers = "";
+    ass_vers = ""
     if args.assembly_version is not None:
         ass_vers = args.assembly_version
     if args.latin_name is None:
         write_aboutHub(about_file, args.long_label,
-                   args.long_label, ass_vers, args.email)
+                       args.long_label, ass_vers, args.email)
     else:
         write_aboutHub(about_file, args.long_label,
-                   args.latin_name, ass_vers, args.email)
+                       args.latin_name, ass_vers, args.email)
 
     default_seq_id = ""
     default_seq_end = 0
@@ -1544,7 +1596,7 @@ if args.bam:
         bam_sorted_file = hub_dir + "rnaseq_" + str(bam_index) + ".s.bam"
         if not args.display_bam_as_bam:
             subprcs_args = [samtools, "sort", "-@",
-                        str(args.cores), bam_file, "-o", bam_sorted_file]
+                            str(args.cores), bam_file, "-o", bam_sorted_file]
             run_simple_process(subprcs_args)
         wig_file = tmp_dir + "rnaseq_" + str(bam_index) + ".wig"
         if bam2wig_aug is True:
