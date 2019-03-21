@@ -42,7 +42,8 @@ __status__ = "production"
 
 ucsc_tools = {'bedToBigBed': '', 'genePredCheck': '', 'faToTwoBit': '',
               'gtfToGenePred': '', 'hgGcPercent': '', 'ixIxx': '',
-              'twoBitInfo': '', 'wigToBigWig': '', 'genePredToBed': ''}
+              'twoBitInfo': '', 'wigToBigWig': '', 'genePredToBed': '',
+              'genePredToBigGenePred': ''}
 
 augustus_tools = {'bam2wig': ''}
 
@@ -362,6 +363,9 @@ plat_sys = platform.system()
 if args.verbosity > 0:
     print("Searching for required UCSC tools:")
 for key, val in ucsc_tools.items():
+    # genePredToBigBed is optional because some users might not have easy access
+    if key is 'genePredToBigBed' and no_genePredToBigBed:
+        continue
     if shutil.which(key) is not None:
         ucsc_tools[key] = shutil.which(key)
     elif os.path.isfile(os.getcwd() + "/" + key):
