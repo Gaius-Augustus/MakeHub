@@ -473,13 +473,14 @@ for key, val in ucsc_as_files.items():
             except:
                 frameinfo = getframeinfo(currentframe())
                 print('Error in file ' + frameinfo.filename + ' at line ' +
-                    str(frameinfo.lineno) + ": Downloading file " + key + 
+                      str(frameinfo.lineno) + ": Downloading file " + key +
                       " failed. If your " +
-                      "machine does not have internet access, you may " + 
-                      "manually download the file from " + as_url + key + 
+                      "machine does not have internet access, you may " +
+                      "manually download the file from " + as_url + key +
                       " and store it in the directory where make_hub.py " +
                       "resides.")
 
+print(ucsc_as_files)
 
 ''' ******************* BEGIN FUNCTIONS *************************************'''
 
@@ -779,11 +780,23 @@ def bed2bigBed(btype, bed_file, chrom_size_file, bigBedFile):
     run_simple_process(subprcs_args)
 
 
-''' Function that converts gtf to bb format '''
+''' Function that converts bigGenePred bed-format to special bigBed fromat
+for gene predictions '''
 
 
-def gtf2bb(gtf_file, gp_file, bed_file, bb_file, info_out_file, chrom_size_file,
-           sort_tool):
+def bigGenePredToBigBed(as_file, bigGenePred_file, chrom_size_file, bb_file):
+    print('Generating bigBed file from bigGenePred format for ' +
+          bigGenePred_file + '...')
+    subprcs_args = [ucsc_tools['bedToBigBed'], '-as=' + as_file,
+                    '-type=bed12+8', bigGenePred_file, chrom_size_file, 
+                    bb_file]
+    run_simple_process(subprcs_args)
+
+
+''' Function that converts gtf to genePred format, used in gtf2bb and gtf2bgpbb '''
+
+
+def gtf2genePred(gtf_file, gp_file, info_out_file):
     subprcs_args = [ucsc_tools['gtfToGenePred'], '-infoOut=' +
                     info_out_file, '-genePredExt', gtf_file, gp_file]
     run_simple_process(subprcs_args)
@@ -798,6 +811,14 @@ def gtf2bb(gtf_file, gp_file, bed_file, bb_file, info_out_file, chrom_size_file,
     if int(regex_result.group(1)) > 0:
         print("Warning: " + regex_result.group(1) +
               " annotations did not pass validation!")
+
+
+''' Function that converts gtf to bb format '''
+
+
+def gtf2bb(gtf_file, gp_file, bed_file, bb_file, info_out_file, chrom_size_file,
+           sort_tool):
+    gtf2genePred(gtf_file, gp_file)
     subprcs_args = [ucsc_tools['genePredToBed'], gp_file, 'stdout']
     result = run_simple_process(subprcs_args)
     subprcs_args = [sort_tool, '-k1,1', '-k2,2n']
@@ -806,10 +827,51 @@ def gtf2bb(gtf_file, gp_file, bed_file, bb_file, info_out_file, chrom_size_file,
     bed2bigBed(12, bed_file, chrom_size_file, bb_file)
 
 
+''' Function that converts gtf to bigGenePred bb format (allows display of
+amino acids in browser), alternative to gtf2bb '''
+
+
+def gtf2bgpbb(gtf_file, gp_file, bigGenePred_file, info_out_file, chrom_size_file,
+              as_file, sort_tool, bb_file, short_label):
+    gtf2genePred(gtf_file, gp_file, info_out_file)
+    subprcs_args = [ucsc_tools['genePredToBigGenePred'], gp_file, 'stdout']
+    result = run_simple_process(subprcs_args)
+    subprcs_args = [sort_tool, '-k1,1', '-k2,2n']
+    result = run_process_stdinput(subprcs_args, result.stdout)
+    write_byteobj(result.stdout, bigGenePred_file)
+    # type and geneType field are empty in resulting file, fix it:
+    bigGenePredFixed_file = tmp_dir + short_label + ".fixed.bed"
+    try:
+        with open(bigGenePred_file, "r") as bigGenePred_handle:
+            try:
+                with open(bigGenePredFixed_file, "w") as fixed_handle:
+                    for line in bigGenePred_handle:
+                        line_items = re.split(r'\t+', line)
+                        print(line_items)
+                        for i in range(0,16):
+                            fixed_handle.write(line_items[i] + '\t')
+                        fixed_handle.write('none\t' + line_items[17] + 'none' + line_items[18])
+
+            except IOError:
+                frameinfo = getframeinfo(currentframe())
+                print('Error in file ' + frameinfo.filename + ' at line ' +
+                    str(frameinfo.lineno) + ': ' + "Failed to open file " +
+                    bigGenePredFixed_file + " for writing!")
+        quit(1)
+    except IOError:
+        frameinfo = getframeinfo(currentframe())
+        print('Error in file ' + frameinfo.filename + ' at line ' +
+              str(frameinfo.lineno) + ': ' + "Failed to open file " +
+              bigGenePred_file + " for reading!")
+        quit(1)
+    bigGenePredToBigBed(as_file, bigGenePred_file, chrom_size_file, bb_file)
+
+
 ''' Function that writes info about gene pred or hints to trackDb file '''
 
 
-def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group, bed_no, visibility):
+def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group,
+                    bed_no, visibility):
     # if maker track, use separate name for label...
     track_name = short_label
     if(re.search(r'_maker', track_name)):
@@ -848,13 +910,11 @@ def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_la
     if no_genePredToBigGenePredFlag is True:
         gtf2bb(gtf_file, gp_file, bed_file, bb_file,
                info_out_file, chrom_size_file, sort_tool)
-        info_to_trackDB(trackDb_file, short_label, long_label,
-                        rgb_color, "genePreds", 12, visibility)
     else:
-        # PUT CODE FOR bigGenePred FORMAT HERE!!! THIS IS WHERE I AM!
         gtf2bgpbb(gtf_file, gp_file, bed_file, info_out_file, chrom_size_file,
-                  sort_tool)
-        info_to_trackDB()
+                  ucsc_as_files['bigGenePred.as'], sort_tool, bb_file, short_label)
+    info_to_trackDB(trackDb_file, short_label, long_label,
+                    rgb_color, "genePreds", 12, visibility)
     # parse info_out_file to produce txt file for creating nameIndex files
     name_index_txt_file = tmp_dir + short_label + ".nameIndex.txt"
     try:
@@ -1657,7 +1717,8 @@ if args.annot:
     visibility_counter, visibility = set_visibility(visibility_counter)
     col_idx, this_color = set_color(col_idx, rgb_cols)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "annot",
-                   "Reference Annotation", this_color, visibility)
+                   "Reference Annotation", this_color, visibility, 
+                   args.no_genePredToBigGenePred)
     html_file = hub_dir + "annot.html"
     write_trackDescription(html_file, "annot", "This gene prediction track with reference annotation " +
                            "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1673,7 +1734,8 @@ if args.genemark:
     visibility_counter, visibility = set_visibility(visibility_counter)
     col_idx, this_color = set_color(col_idx, rgb_cols)
     make_gtf_track(trackDb_file, args.genemark, ChromSizes_file, "genemark",
-                   "GeneMark predictions", this_color, visibility)
+                   "GeneMark predictions", this_color, visibility,
+                   args.no_genePredToBigGenePred)
     html_file = hub_dir + "genemark.html"
     write_trackDescription(html_file, "genemark", "This gene prediction track with GeneMark-ES/ET predictions " +
                            "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1693,7 +1755,7 @@ if args.aug_ab_initio:
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file,
                    "aug_ab_initio_no_utr",
                    "AUGUSTUS ab initio predictions without UTRs",
-                   this_color, visibility)
+                   this_color, visibility, args.no_genePredToBigGenePred)
     html_file = hub_dir + "aug_ab_initio_no_utr.html"
     write_trackDescription(html_file, "aug_ab_initio_no_utr", "This gene prediction track with AUGUSTUS <i>ab initio</i> predictions (without UTRs) " +
                            "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1713,7 +1775,7 @@ if args.aug_hints:
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file,
                    "aug_hints_no_utr",
                    "AUGUSTUS predictions with hints without UTRs",
-                   this_color, visibility)
+                   this_color, visibility, args.no_genePredToBigGenePred)
     html_file = hub_dir + "aug_hints_no_utr.html"
     write_trackDescription(html_file, "aug_hints_no_utr", "This gene prediction track with AUGUSTUS predictions with hints (without UTRs) " +
                            "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1733,7 +1795,7 @@ if args.aug_ab_initio_utr:
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file,
                    "aug_ab_initio_utr",
                    "AUGUSTUS ab initio predictions with UTRs",
-                   this_color, visibility)
+                   this_color, visibility, args.no_genePredToBigGenePred)
     html_file = hub_dir + "aug_ab_initio_utr.html"
     write_trackDescription(html_file, "aug_ab_initio_utr", "This gene prediction track with AUGUSTUS <i>ab initio</i> predictions with UTRs " +
                            "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1752,7 +1814,7 @@ if args.aug_hints_utr:
     col_idx, this_color = set_color(col_idx, rgb_cols)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "aug_hints_utr",
                    "AUGUSTUS predictions with hints and UTRs",
-                   this_color, visibility)
+                   this_color, visibility, args.no_genePredToBigGenePred)
     html_file = hub_dir + "aug_hints_utr.html"
     write_trackDescription(html_file, "aug_hints_utr", "This gene prediction track with AUGUSTUS predictions with hints and UTRs" +
                            "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1773,7 +1835,7 @@ if args.gemoma_filtered_predictions:
     col_idx, this_color = set_color(col_idx, rgb_cols)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "gemoma_filtered_predictions",
                    "Gemoma filtered predictions",
-                   this_color, visibility)
+                   this_color, visibility, args.no_genePredToBigGenePred)
     html_file = hub_dir + "gemoma_filtered_predictions.html"
     write_trackDescription(html_file, "gemoma", "This gene prediction track with Gemoma predictions " +
                            "was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1809,7 +1871,7 @@ if args.gene_track:
     visibility_counter, visibility = set_visibility(visibility_counter)
     col_idx, this_color = set_color(col_idx, rgb_cols)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, args.gene_track[1],
-                   args.gene_track[1], this_color, visibility)
+                   args.gene_track[1], this_color, visibility, args.no_genePredToBigGenePred)
     html_file = hub_dir + args.gene_track[1] + ".html"
     write_trackDescription(html_file, args.gene_track[1], "This gene prediction track was added to the assembly hub as <i>general gene track with custom label</i>. " +
                            "It was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1825,7 +1887,8 @@ if args.traingenes:
     visibility_counter, visibility = set_visibility(visibility_counter)
     col_idx, this_color = set_color(col_idx, rgb_cols)
     make_gtf_track(trackDb_file, args.traingenes, ChromSizes_file, "traingenes",
-                   "Training genes", this_color, visibility)
+                   "Training genes", this_color, visibility, 
+                   args.no_genePredToBigGenePred)
     html_file = "traingenes.html"
     write_trackDescription(html_file, args.traingenes, "This training gene track was added to the assembly hub by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
                            "make_hub.py</a> using <a href=\"http://hgdownload.soe.ucsc.edu/admin/exe\">UCSC tools</a>.</p>",
@@ -1914,7 +1977,8 @@ if args.maker_gff:
             visibility_counter, visibility = set_visibility(visibility_counter)
             col_idx, this_color = set_color(col_idx, rgb_cols)
             make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, feature,
-                           "MAKER gene predictions", this_color, visibility)
+                           "MAKER gene predictions", this_color, visibility,
+                           args.no_genePredToBigGenePred)
     # delete because it consumes a lot of RAM
     del maker_categ
 
