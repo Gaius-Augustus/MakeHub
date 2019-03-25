@@ -348,8 +348,8 @@ make_hub.py -l hmi4 -L "Rodent tapeworm" -g data/genome.fa -e \
 ```
 
 In comparison to the first two examples, the resulting hub has a large
-number of evidence and gene prediction tracks from BRAKER, MAKER and
-Gemoma.
+number of evidence and gene prediction tracks from BRAKER, MAKER,
+Gemoma, GlimmerHMM and SNAP.
 
 If you want to visualize the result, connect the following hub with the
 UCSC genome browser (see section
@@ -380,7 +380,7 @@ add) are:
 
 Usage example 3:
 
-First, we create a novel track hub hmi3 that is identical to Usage example 2:
+First, we create a novel track hub hmi3 that is similar to Usage example 2:
 
 ```
 make_hub.py -l hmi3 -L "Rodent tapeworm" -g data/genome.fa -e \
@@ -604,6 +604,18 @@ It consists of the following files:
  RepeatMasker, AUGUSTUS with BRAKER-trained parameters, BUSCO
  predictions as evidence, and GeneMark-ES/ET predictions with
  BRAKER-trained parameters.
+
+* ```glimmer.gff```: GlimmerHMM predictions from running
+ GlimmerHMM on target genome sequence with human parameters:
+ ```glimmhmm.pl glimmerhmm_linux_x86_64 genome.fa trained_dir/human "-g -o glimmer.out```
+
+* ```snap.gff```: SNAP prediction from running SNAP on target
+  genome sequence with worm parameters, subsequent conversion
+  from zff to gff-format with the SNAP script zff2gff3.pl:
+  ```
+    snap worm genome.fa > snap.zff
+    cat snap.zff | zff2gff3.pl > snap.gff
+ ```
 
 
 Output of MakeHub
