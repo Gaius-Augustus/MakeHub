@@ -359,19 +359,6 @@ if sort_tool is None:
     quit(1)
 
 
-''' Find bash awk tool '''
-
-awk_tool = shutil.which('awk')
-if awk_tool is None:
-    frameinfo = getframeinfo(currentframe())
-    print('Error in file ' + frameinfo.filename + ' at line ' +
-          str(frameinfo.lineno) + ': ' + "Unable to locate bash tool 'awk'")
-    print('sort is part of most Linux distributions. On Ubuntu, it is ' +
-          'part of the package coreutils. Try re-installing your bash if awk' +
-          ' is missing on your system.')
-    quit(1)
-
-
 ''' Find or obtain UCSC tools '''
 # the URLs of UCSC tool download are hardcoded for linux.x84_64
 
