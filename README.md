@@ -216,8 +216,10 @@ MakeHub accepts files in the following formats:
 * gene prediction file(s) in GTF-format, e.g. from BRAKER
 * AUGUSTUS hints files in BRAKER-specific GFF hints format
 * Gene prediction files in GFF3-format from MAKER
-  <sup name="a6">[6](#f6)</sup> and Gemoma
-  <sup name="a7">[7](#f7)</sup>
+  <sup name="a6">[6](#f6)</sup>, Gemoma
+  <sup name="a7">[7](#f7)</sup>, SNAP
+  <sup name="a8">[8](#f8)</sup>and GlimmerHMM
+  <sup name="a9">[9](#f9)</sup>.
 
 
 
@@ -304,6 +306,7 @@ Usage example 4:
 make_hub.py -l hmi4 -L "Rodent tapeworm" -g data/genome.fa -e \
   katharina.hoff@uni-greifswald.de -a data/annot.gtf -b data/rnaseq.bam \
   -d -X data -M data/maker.gff -E data/gemoma.gff \
+  -I data/glimmer.gff -S data/snap.gff \
   -N "Hymenolepsis microstoma" -V GCA_000469805.2
 ```
 
@@ -485,6 +488,11 @@ In the following, we explain all options of make_hub.py
   of a ```glimmhmm.pl glimmerhmm_linux_x86_64 genome.fa trained_dir/human "-g -o glimmer.out"```
   command.
 
+* ```-S SNAP_GFF, --snap_gff SNAP_GFF```
+  SNAP output file in GFF3 format. This file could e.g. be the result of the two commands
+  1) ```snap worm genome.fa > snap.zff```
+  2) ```cat snap.zff | zff2gff3.pl > snap.gff```
+
 * ```-E GEMOMA_FILTERED_PREDICTIONS, --gemoma_filtered_predictions GEMOMA_FILTERED_PREDICTIONS```
   GFF3 output file of Gemoma (filtered_predictions.gff)
 
@@ -659,6 +667,12 @@ References
 
 <b id="f7">[7]</b> Keilwagen J, Hartung F, Paulini M, Twardziok SO, Grau J. 2018.
 “Combining RNA-seq data and homology-based gene prediction for plants, animals and fungi.” *BMC Bioinformatics* 19(1), 189.[↩](#a7)
+
+<b id="f8">[8]</b> Korf, I. 2004.
+“Gene finding in novel genomes” *BMC Bioinformatics* 5, 59.[↩](#a8)
+
+<b id="f9">[9]</b> Majoros WH, Salzberg SL. 2004.
+“TigrScan and GlimmerHMM: two open source ab initio eukaryotic gene-finders” *Bioinformatics* 20(16), 2878-2879.[↩](#a9)
 
 
 
