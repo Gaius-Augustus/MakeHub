@@ -141,6 +141,15 @@ crash. If you observe this, try downloading the sources of KentUtils
 from github. We have had the best experience with compiling Kent
 tools for MakeHub from <https://github.com/ENCODE-DCC/kentUtils/>.
 
+MakeHub uses two ```*as```-files from UCSC:
+
+* <http://genome.ucsc.edu/goldenPath/help/examples/bigGenePred.as>
+* <http://genome.ucsc.edu/goldenPath/help/examples/cytoBand.as>
+
+MakeHub will automatically download both files if they are not
+already present in the directory where ```make_hub.py``` or
+UCSC tools reside.
+
 MakeHub uses Samtools for BAM file sorting and conversion. Samtools is
 avilable at <https://github.com/samtools/>. It is also avilable as
 package with many linux distributions.
@@ -153,7 +162,25 @@ sudo apt install samtools
 
 MakeHub has been tested with Samtools 1.8-20-g4ff8062. It is
 not fully downward compatible with older versions (we have
-for example tried samtools 1.1 and that is incompatible).
+for example tried samtools 1.1 and that is incompatible). How
+to know whether your samtools version is compatible? The
+samtools calls by ```make_hub.py``` are of the following
+syntax:
+
+```
+samtools sort -@ INT file.bam -o out.bam
+samtools index -@ INT file.bam file.bam.bai
+samtools mpileup -o file.pu file.bam
+```
+
+At some point in time, the samtools usage changed so that the
+output option ```-o out.bam``` became possible. In earlier
+versions, files were written to STDOUT. If you type
+```samtools sort --help```, you want to find a line that says
+
+```-o FILE    Write final output to FILE rather than standard output```
+
+If this line is present, your samtools are most likely compatible.
 
 MakeHub uses gzip for compressing wig files that were created
 from BAM files. gzip is available at <https://ftp.gnu.org/gnu/gzip/>.
