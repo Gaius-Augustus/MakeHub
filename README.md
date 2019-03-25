@@ -399,7 +399,7 @@ The resulting hub has many gene prediction tracks from the BRAKER output directo
 ```data```, and from the MAKER output file ```data/maker.gff```.
 
 Let's add one more track (only for the sake of demonstration, this track could
-have been included in the previous example, or course, or at the point of time
+have been included in the previous example, of course, or at the point of time
 of track generation):
 
 ```
