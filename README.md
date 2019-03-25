@@ -128,6 +128,7 @@ MakeHub uses the following tools provided by UCSC at
 * twoBitInfo
 * wigToBigWig
 * genePredToBed
+* genePredToBigGenePred (optional)
 
 You may download these binaries and make them available in your
 $PATH. However, if you skip installing these tools, they will
