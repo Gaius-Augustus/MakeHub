@@ -612,10 +612,8 @@ It consists of the following files:
 * ```snap.gff```: SNAP prediction from running SNAP on target
   genome sequence with worm parameters, subsequent conversion
   from zff to gff-format with the SNAP script zff2gff3.pl:
-  ```
-    snap worm genome.fa > snap.zff
-    cat snap.zff | zff2gff3.pl > snap.gff
- ```
+  ```snap worm genome.fa > snap.zff```
+  ```cat snap.zff | zff2gff3.pl > snap.gff```
 
 
 Output of MakeHub
