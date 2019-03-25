@@ -174,13 +174,12 @@ samtools mpileup -o file.pu file.bam
 ```
 
 At some point in time, the samtools usage changed so that the
-output option ```-o out.bam``` became possible. In earlier
-versions, files were written to STDOUT. If you type
+output option ```-o out.bam``` became possible. If you type
 ```samtools sort --help```, you want to find a line that says
 
 ```-o FILE    Write final output to FILE rather than standard output```
 
-If this line is present, your samtools are most likely compatible.
+then your samtools are most likely compatible.
 
 MakeHub uses gzip for compressing wig files that were created
 from BAM files. gzip is available at <https://ftp.gnu.org/gnu/gzip/>.
