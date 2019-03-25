@@ -36,7 +36,7 @@ __author__ = "Kathairna J. Hoff"
 __copyright__ = "Copyright 2019. All rights reserved."
 __credits__ = "Mario Stanke"
 __license__ = "Artistic Licsense"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __email__ = "katharina.hoff@uni-greifswald.de"
 __status__ = "production"
 
