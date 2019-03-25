@@ -359,6 +359,19 @@ if sort_tool is None:
     quit(1)
 
 
+''' Find bash awk tool '''
+
+awk_tool = shutil.which('awk')
+if awk_tool is None:
+    frameinfo = getframeinfo(currentframe())
+    print('Error in file ' + frameinfo.filename + ' at line ' +
+          str(frameinfo.lineno) + ': ' + "Unable to locate bash tool 'awk'")
+    print('sort is part of most Linux distributions. On Ubuntu, it is ' +
+          'part of the package coreutils. Try re-installing your bash if awk' +
+          ' is missing on your system.')
+    quit(1)
+
+
 ''' Find or obtain UCSC tools '''
 # the URLs of UCSC tool download are hardcoded for linux.x84_64
 
@@ -773,10 +786,14 @@ def sort_bed3(bed3_file, bed3_sorted_file):
 ''' Function that converts bed to bigBed '''
 
 
-def bed2bigBed(btype, bed_file, chrom_size_file, bigBedFile):
+def bed2bigBed(btype, bed_file, chrom_size_file, bigBedFile, as_file):
     print('Generating bigBed file for ' + bed_file + '...')
-    subprcs_args = [ucsc_tools['bedToBigBed'], '-type=bed' +
-                    str(btype), bed_file, chrom_size_file, bigBedFile]
+    if as_file is None:
+        subprcs_args = [ucsc_tools['bedToBigBed'], '-type=bed' +
+                        str(btype), bed_file, chrom_size_file, bigBedFile]
+    else:
+        subprcs_args = [ucsc_tools['bedToBigBed'], '-type=bed' +
+                        str(btype), bed_file, '-as=' + as_file, chrom_size_file, bigBedFile]
     run_simple_process(subprcs_args)
 
 
@@ -788,7 +805,7 @@ def bigGenePredToBigBed(as_file, bigGenePred_file, chrom_size_file, bb_file):
     print('Generating bigBed file from bigGenePred format for ' +
           bigGenePred_file + '...')
     subprcs_args = [ucsc_tools['bedToBigBed'], '-as=' + as_file,
-                    '-type=bed12+8', bigGenePred_file, chrom_size_file, 
+                    '-type=bed12+8', bigGenePred_file, chrom_size_file,
                     bb_file]
     run_simple_process(subprcs_args)
 
@@ -824,7 +841,7 @@ def gtf2bb(gtf_file, gp_file, bed_file, bb_file, info_out_file, chrom_size_file,
     subprcs_args = [sort_tool, '-k1,1', '-k2,2n']
     result = run_process_stdinput(subprcs_args, result.stdout)
     write_byteobj(result.stdout, bed_file)
-    bed2bigBed(12, bed_file, chrom_size_file, bb_file)
+    bed2bigBed(12, bed_file, chrom_size_file, bb_file, None)
 
 
 ''' Function that converts gtf to bigGenePred bb format (allows display of
@@ -847,14 +864,15 @@ def gtf2bgpbb(gtf_file, gp_file, bigGenePred_file, info_out_file, chrom_size_fil
                 with open(bigGenePredFixed_file, "w") as fixed_handle:
                     for line in bigGenePred_handle:
                         line_items = re.split(r'\t+', line)
-                        for i in range(0,16):
+                        for i in range(0, 16):
                             fixed_handle.write(line_items[i] + '\t')
-                        fixed_handle.write('none\t' + line_items[16] + '\tnone\t' + line_items[17] + '\n')
+                        fixed_handle.write(
+                            'none\t' + line_items[16] + '\tnone\t' + line_items[17] + '\n')
             except IOError:
                 frameinfo = getframeinfo(currentframe())
                 print('Error in file ' + frameinfo.filename + ' at line ' +
-                    str(frameinfo.lineno) + ': ' + "Failed to open file " +
-                    bigGenePredFixed_file + " for writing!")
+                      str(frameinfo.lineno) + ': ' + "Failed to open file " +
+                      bigGenePredFixed_file + " for writing!")
                 quit(1)
     except IOError:
         frameinfo = getframeinfo(currentframe())
@@ -862,7 +880,8 @@ def gtf2bgpbb(gtf_file, gp_file, bigGenePred_file, info_out_file, chrom_size_fil
               str(frameinfo.lineno) + ': ' + "Failed to open file " +
               bigGenePred_file + " for reading!")
         quit(1)
-    bigGenePredToBigBed(as_file, bigGenePredFixed_file, chrom_size_file, bb_file)
+    bigGenePredToBigBed(as_file, bigGenePredFixed_file,
+                        chrom_size_file, bb_file)
 
 
 ''' Function that writes info about gene pred or hints to trackDb file '''
@@ -919,7 +938,7 @@ def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_la
                   ucsc_as_files['bigGenePred.as'], sort_tool, bb_file, short_label)
         print("Next step should be writing trackDb entry...")
         info_to_trackDB(trackDb_file, short_label, long_label,
-                    rgb_color, "genePreds", None, visibility, 'bigGenePred')
+                        rgb_color, "genePreds", None, visibility, 'bigGenePred')
     # parse info_out_file to produce txt file for creating nameIndex files
     name_index_txt_file = tmp_dir + short_label + ".nameIndex.txt"
     try:
@@ -1546,6 +1565,62 @@ if not args.add_track:
               groups_txt_file + " for writing!")
         quit(1)
 
+    ''' Generate cytoband track '''
+
+    if ucsc_as_files['cytoBand.as'] is not None:
+        print('Generating cytoband track...')
+        cytoBand_sort_file = tmp_dir + args.short_label + ".cytoBand.sorted"
+        cytoBand_bed = tmp_dir + args.short_label + ".cytoband.bed"
+        cytoBand_file = hub_dir + "cytoBandIdeo.bb"
+        try:
+            with open(ChromSizes_file, "r") as chrom_sizes_handle:
+                chrom_sizes_data = chrom_sizes_handle.read()
+        except IOError:
+            frameinfo = getframeinfo(currentframe())
+            print('Error in file ' + frameinfo.filename + ' at line ' +
+                  str(frameinfo.lineno) + ': ' + "Failed to open file " +
+                  ChromSizes_file + " for reading!")
+            quit(1)
+        subprcs_args = [sort_tool, '-k1,1', '-k2,2n']
+        result = run_process_stdinput(
+            subprcs_args, chrom_sizes_data.encode('utf-8'))
+        write_byteobj(result.stdout, cytoBand_sort_file)
+        try:
+            with open(cytoBand_bed, "w") as cyto_bed_handle:
+                try:
+                    with open(cytoBand_sort_file, "r") as cyto_sort_handle:
+                        for line in cyto_sort_handle:
+                            line = line.strip()
+                            line_entries = re.split(r'\t', line)
+                            cyto_bed_handle.write(
+                                line_entries[0] + "\t0\t" + line_entries[1] + "\t" +
+                                line_entries[1] + "\tgneg\n")
+                except IOError:
+                    frameinfo = getframeinfo(currentframe())
+                    print('Error in file ' + frameinfo.filename + ' at line ' +
+                          str(frameinfo.lineno) + ': ' + "Failed to open file " +
+                          cytoBand_sort_file + " for reading!")
+                    quit(1)
+        except IOError:
+            frameinfo = getframeinfo(currentframe())
+            print('Error in file ' + frameinfo.filename + ' at line ' +
+                  str(frameinfo.lineno) + ': ' + "Failed to open file " +
+                  cytoBand_bed + " for writing!")
+            quit(1)
+        bed2bigBed(4, cytoBand_bed, ChromSizes_file,
+                   cytoBand_file, ucsc_as_files['cytoBand.as'])
+        try:
+            with open(trackDb_file, "a+") as trackDb_handle:
+                trackDb_handle.write("track cytoBandIdeo\nlongLabel Chromosome " +
+                                     "ideogram\nshortLabel cytoBandIdeo\n" + 
+                                     "bigDataUrl cytoBandIdeo.bb\ntype bigBed\n\n")
+        except IOError:
+            frameinfo = getframeinfo(currentframe())
+            print('Error in file ' + frameinfo.filename + ' at line ' +
+                  str(frameinfo.lineno) + ': ' + "Failed to open file " +
+                trackDb_file + " for writing!")
+            quit(1)
+
     ''' Generate repeat masking track '''
 
     if not args.no_repeats:
@@ -1559,7 +1634,7 @@ if not args.add_track:
         sort_bed3(softmaskedBed3_file, softmaskedBed3_sorted_file)
         softmaskedBigBed_file = hub_dir + args.short_label + "_softmasking.bb"
         bed2bigBed(3, softmaskedBed3_sorted_file,
-                   ChromSizes_file, softmaskedBigBed_file)
+                   ChromSizes_file, softmaskedBigBed_file, None)
         try:
             with open(trackDb_file, "a") as trackDb_handle:
                 visibility_counter, visibility = set_visibility(
@@ -1722,7 +1797,7 @@ if args.annot:
     visibility_counter, visibility = set_visibility(visibility_counter)
     col_idx, this_color = set_color(col_idx, rgb_cols)
     make_gtf_track(trackDb_file, ucsc_file, ChromSizes_file, "annot",
-                   "Reference Annotation", this_color, visibility, 
+                   "Reference Annotation", this_color, visibility,
                    args.no_genePredToBigGenePred)
     html_file = hub_dir + "annot.html"
     write_trackDescription(html_file, "annot", "This gene prediction track with reference annotation " +
@@ -1892,7 +1967,7 @@ if args.traingenes:
     visibility_counter, visibility = set_visibility(visibility_counter)
     col_idx, this_color = set_color(col_idx, rgb_cols)
     make_gtf_track(trackDb_file, args.traingenes, ChromSizes_file, "traingenes",
-                   "Training genes", this_color, visibility, 
+                   "Training genes", this_color, visibility,
                    args.no_genePredToBigGenePred)
     html_file = "traingenes.html"
     write_trackDescription(html_file, args.traingenes, "This training gene track was added to the assembly hub by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -1963,7 +2038,7 @@ if args.maker_gff:
             sort_bed3(this_maker_file, this_sorted_maker_file)
             this_maker_bb_file = hub_dir + feature + "_" + "maker.bb"
             bed2bigBed(12, this_sorted_maker_file,
-                       ChromSizes_file, this_maker_bb_file)
+                       ChromSizes_file, this_maker_bb_file, None)
             visibility_counter, visibility = set_visibility(visibility_counter)
             col_idx, this_color = set_color(col_idx, rgb_cols)
             info_to_trackDB(trackDb_file, feature + "_maker", "Evidence by MAKER from source " + feature, this_color,
@@ -2099,7 +2174,7 @@ if args.hints:
                 this_sorted_hints_file = this_hints_file + ".sorted"
                 sort_bed3(this_hints_file, this_sorted_hints_file)
                 bed2bigBed(12, this_sorted_hints_file,
-                           ChromSizes_file, bb_file)
+                           ChromSizes_file, bb_file, None)
             visibility_counter, visibility = set_visibility(visibility_counter)
             col_idx, this_color = set_color(col_idx, rgb_cols)
             info_to_trackDB(trackDb_file, h_src + "_" + h_type + "_hints_" +
