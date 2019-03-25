@@ -5,14 +5,14 @@ Author and Contact Information
 
 Katharina J. Hoff
 
-University of Greifswald
-Institute for Mathematics and Computer Science
-Walther-Rathenau-Str. 47
+University of Greifswald,
+Institute for Mathematics and Computer Science,
+Walther-Rathenau-Str. 47,
 17489 Greifswald
 
-University of Greifswald
-Center for Functional Genomics of Microbes
-Felix-Hausdorff-Str. 8
+University of Greifswald,
+Center for Functional Genomics of Microbes,
+Felix-Hausdorff-Str. 8,
 17489 Greifswald
 
 katharina.hoff@uni-greifswald.de
@@ -705,7 +705,7 @@ References
 <b id="f7">[7]</b> Keilwagen J, Hartung F, Paulini M, Twardziok SO, Grau J. 2018.
 “Combining RNA-seq data and homology-based gene prediction for plants, animals and fungi.” *BMC Bioinformatics* 19(1), 189.[↩](#a7)
 
-<b id="f8">[8]</b> Korf, I. 2004.
+<b id="f8">[8]</b> Korf I. 2004.
 “Gene finding in novel genomes” *BMC Bioinformatics* 5, 59.[↩](#a8)
 
 <b id="f9">[9]</b> Majoros WH, Salzberg SL. 2004.
