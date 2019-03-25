@@ -3,9 +3,19 @@
 Author and Contact Information
 ------------------------------
 
-Katharina J. Hoff, University of Greifswald, Institute for
-Mathematics and Computer Science, Bioinformatics Group
-(katharina.hoff@uni-greifswald.de)
+Katharina J. Hoff
+
+University of Greifswald
+Institute for Mathematics and Computer Science
+Walther-Rathenau-Str. 47
+17489 Greifswald
+
+University of Greifswald
+Center for Functional Genomics of Microbes
+Felix-Hausdorff-Str. 8
+17489 Greifswald
+
+katharina.hoff@uni-greifswald.de
 
 Contents
 ========
