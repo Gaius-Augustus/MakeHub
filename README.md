@@ -361,8 +361,8 @@ Adding tracks to existing hub
 
 If a hub already exists, you may add tracks to this existing hub
 using the option ```-A```, ```--add_track```. The minimal required arguments
-- besides giving the approriate information that you would like to
-add - are:
+(besides giving the approriate information that you would like to
+add) are:
 
 *  ```-A```, ```--add_track```
 
