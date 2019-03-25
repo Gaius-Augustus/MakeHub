@@ -365,6 +365,7 @@ using the option ```-A```, ```--add_track```. The minimal required arguments
 add) are:
 
 *  ```-A```, ```--add_track```
+   Add track(s) to existing hub
 
 * ```-e EMAIL```, ```--email EMAIL```
   Contact e-mail adress for assembly
@@ -374,9 +375,6 @@ add) are:
 * ```-l SHORT_LABEL```, ```--short_label SHORT_LABEL```
   Short label (without whitespaces and special characters) for identifying 
   assembly hub.
-
-* ```-A```, ```--add_track```
-  Add track(s) to existing hub
 
 Usage example 3:
 
