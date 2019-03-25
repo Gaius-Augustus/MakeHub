@@ -710,7 +710,7 @@ def write_byteobj(byte_obj, outfile):
 def find_masked_intervals(genome_file, bed3_file):
     try:
         masked_intervals = []
-        with open(genome_file, "rU") as genome_handle:
+        with open(genome_file, "r") as genome_handle:
             for record in SeqIO.parse(genome_handle, "fasta"):
                 masked_seq = str(record.seq)
                 inMasked = False
@@ -847,31 +847,29 @@ def gtf2bgpbb(gtf_file, gp_file, bigGenePred_file, info_out_file, chrom_size_fil
                 with open(bigGenePredFixed_file, "w") as fixed_handle:
                     for line in bigGenePred_handle:
                         line_items = re.split(r'\t+', line)
-                        print(line_items)
                         for i in range(0,16):
                             fixed_handle.write(line_items[i] + '\t')
-                        fixed_handle.write('none\t' + line_items[17] + 'none' + line_items[18])
-
+                        fixed_handle.write('none\t' + line_items[16] + '\tnone\t' + line_items[17] + '\n')
             except IOError:
                 frameinfo = getframeinfo(currentframe())
                 print('Error in file ' + frameinfo.filename + ' at line ' +
                     str(frameinfo.lineno) + ': ' + "Failed to open file " +
                     bigGenePredFixed_file + " for writing!")
-        quit(1)
+                quit(1)
     except IOError:
         frameinfo = getframeinfo(currentframe())
         print('Error in file ' + frameinfo.filename + ' at line ' +
               str(frameinfo.lineno) + ': ' + "Failed to open file " +
               bigGenePred_file + " for reading!")
         quit(1)
-    bigGenePredToBigBed(as_file, bigGenePred_file, chrom_size_file, bb_file)
+    bigGenePredToBigBed(as_file, bigGenePredFixed_file, chrom_size_file, bb_file)
 
 
 ''' Function that writes info about gene pred or hints to trackDb file '''
 
 
 def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group,
-                    bed_no, visibility):
+                    bed_no, visibility, ttype):
     # if maker track, use separate name for label...
     track_name = short_label
     if(re.search(r'_maker', track_name)):
@@ -881,14 +879,18 @@ def info_to_trackDB(trackDb_file, short_label, long_label, rgb_color, group,
             trackDb_handle.write("track " + short_label + "\n" +
                                  "longLabel " + long_label + "\n" +
                                  "shortLabel " + track_name + "\n" +
-                                 "group " + group + "\ntype bigBed " +
-                                 str(bed_no) + " .\n" +
+                                 "group " + group + "\ntype " + ttype)
+            if bed_no is not None:
+                trackDb_handle.write(str(bed_no) + " .")
+            trackDb_handle.write("\n" +
                                  "bigDataUrl " + short_label + ".bb\n" +
                                  "color " + rgb_color + "\n" +
                                  "visibility " + visibility +
                                  "\nhtml " + short_label + ".html\n\n" +
-                                 "group " + group + "\ntype bigBed " +
-                                 str(bed_no) + " .\n" +
+                                 "group " + group + "\ntype " + ttype)
+            if bed_no is not None:
+                trackDb_handle.write(str(bed_no) + " .")
+            trackDb_handle.write("\n" +
                                  "bigDataUrl " + short_label + ".bb\n" +
                                  "color " + rgb_color + "\n\n")
     except IOError:
@@ -910,11 +912,14 @@ def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_la
     if no_genePredToBigGenePredFlag is True:
         gtf2bb(gtf_file, gp_file, bed_file, bb_file,
                info_out_file, chrom_size_file, sort_tool)
+        info_to_trackDB(trackDb_file, short_label, long_label,
+                        rgb_color, "genePreds", 12, visibility, 'bigBed')
     else:
         gtf2bgpbb(gtf_file, gp_file, bed_file, info_out_file, chrom_size_file,
                   ucsc_as_files['bigGenePred.as'], sort_tool, bb_file, short_label)
-    info_to_trackDB(trackDb_file, short_label, long_label,
-                    rgb_color, "genePreds", 12, visibility)
+        print("Next step should be writing trackDb entry...")
+        info_to_trackDB(trackDb_file, short_label, long_label,
+                    rgb_color, "genePreds", None, visibility, 'bigGenePred')
     # parse info_out_file to produce txt file for creating nameIndex files
     name_index_txt_file = tmp_dir + short_label + ".nameIndex.txt"
     try:
@@ -1452,7 +1457,7 @@ if not args.add_track:
     default_seq_id = ""
     default_seq_end = 0
     try:
-        with open(args.genome, "rU") as genome_handle:
+        with open(args.genome, "r") as genome_handle:
             nSeq = 0
             for record in SeqIO.parse(genome_handle, "fasta"):
                 default_seq_id = record.id
@@ -1962,7 +1967,7 @@ if args.maker_gff:
             visibility_counter, visibility = set_visibility(visibility_counter)
             col_idx, this_color = set_color(col_idx, rgb_cols)
             info_to_trackDB(trackDb_file, feature + "_maker", "Evidence by MAKER from source " + feature, this_color,
-                            "makerEvidence", 12, visibility)
+                            "makerEvidence", 12, visibility, "bigBed")
             html_file = hub_dir + feature + "_maker" + ".html"
             write_trackDescription(html_file, feature + "_maker", "This gene prediction track was added to the assembly hub with the argument <i>--maker_gff MAKER_GFF</i>. " +
                                    "It was generated by <a href=\"https://github.com/Gaius-Augustus/MakeHub\">" +
@@ -2100,7 +2105,7 @@ if args.hints:
             info_to_trackDB(trackDb_file, h_src + "_" + h_type + "_hints_" +
                             str(hint_file_no), "Hints of type " + h_type +
                             " from source " + h_src, this_color,
-                            "hints", 12, visibility)
+                            "hints", 12, visibility, "bigBed")
             html_file = hub_dir + h_src + "_" + h_type + \
                 "_hints_" + str(hint_file_no) + ".html"
             write_trackDescription(html_file, h_src + "_" + h_type + "_hints_" +
