@@ -480,6 +480,11 @@ In the following, we explain all options of make_hub.py
   MAKER2 output file in GFF3 format. This file could be the result of
   a ```gff3_merge -d *_master_datastore_index.log``` command.
 
+* ```-I GLIMMER_GFF, --glimmer_gff GLIMMER_GFF```
+  GlimmerHMM output file in GFF3 format. This file could be the result
+  of a ```glimmhmm.pl glimmerhmm_linux_x86_64 genome.fa trained_dir/human "-g -o glimmer.out"```
+  command.
+
 * ```-E GEMOMA_FILTERED_PREDICTIONS, --gemoma_filtered_predictions GEMOMA_FILTERED_PREDICTIONS```
   GFF3 output file of Gemoma (filtered_predictions.gff)
 
@@ -497,6 +502,14 @@ In the following, we explain all options of make_hub.py
 
 * ```-r, --no_tmp_rm```
   Do not delete temporary files (e.g. for debugging purposes).
+
+* ```-P, --no_genePredToBigGenePred```
+  Option for the special case in which the precompiled
+  UCSC binaries are not working on your system, and you
+  installed kentutils from the older ENCODE github
+  repository; if activated, gene prediction tracks will
+  be output to bigBed instead of bigGenePred format and
+  amino acid display will not be possible.
 
 * ```-v VERBOSITY, --verbosity VERBOSITY```
   If INT VERBOSITY > 0, verbose logging output is produced (e.g. for
