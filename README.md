@@ -84,7 +84,7 @@ the AUGUSTUS tool bam2wig.
 
 Many users who create the input data for MakeHub, e.g. with BRAKER
 <sup name="a5">[5](#f5)</sup>, have the required dependencies
-already installed on their system and my thus skip ahead to section
+already installed on their system and may thus skip ahead to section
 [Running MakeHub](#running-makehub). In case of doubt, read the
 following sections about installation of Dependencies and MakeHub
 installation.
