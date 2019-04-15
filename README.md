@@ -33,6 +33,7 @@ Contents
 -   [Example data](#example-data)
 -   [Output of MakeHub](#output-of-makehub)
 -   [How to use MakeHub output with UCSC Genome Browser](#how-to-use-makehub-output-with-ucsc-genome-browser)
+-   [Steps to take prior adding a MakeHub Track Data Hub to the UCSC public hub list](#steps-to-take-prior-adding-a-MakeHub-Track-Data-Hub-to-the-UCSC-public-hub-list)
 -   [Bug reporting](#bug-reporting)
 -   [Citing MakeHub](#citing-makehub)
 -   [License](#license)
@@ -655,6 +656,34 @@ Go to <https://genome.ucsc.edu/index.html>, click on ```My Data```
 -> ```Track Hubs``` -> ```My Hubs``` and add the link to your
 publicly available ```hub.txt``` file  into the URL window.
 Subsequently, click on ```Add Hub```.
+
+Steps to take prior adding a MakeHub Track Data Hub to the UCSC public hub list
+===============================================================================
+
+For running MakeHub, we use the value of argument ```--short_label``` as directory
+name for the genomic data of a species. Therefore, we prefer to have a 'short label'
+without spaces. UCSC, however, wants to a have real 'short description', e.g.
+consisting of multiple words as a short label. Therefore, go to the file
+```hub.txt``` and change the shortLabel entry to something more descriptive.
+If you already had a very descriptive ```--long_label```, you are good to go with that,
+but if you also didn't choose something very descriptive here, please edit.
+
+For example, we chose the 'short label' "Purple sea star Assembly Hub" and the 
+'long label' "This is the Assembly Hub of the purple sea star (Pisaster ochraceus, 
+assembly 12Jun2017_28pcJ)" for a public hub.
+
+Further, edit all the description HTML pages of your hub and add information specific
+to the data that you are visualizing. The description pages are located in your
+hub directory. ```aboutHub.html``` is located at the top of the hub directory 
+structure. You can find all other pages by calling
+
+```ls $shortLabel/$shortLabel/*.html```
+
+where $shortLabel is the actual shortLabel that you used to build the hub.
+
+Please also have a look at <http://genomewiki.ucsc.edu/index.php/Public_Hub_Guidelines> 
+prior asking the UCSC team to add your hub to the list of public hubs.
+
 
 Bug reporting
 =============
