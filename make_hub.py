@@ -2284,7 +2284,7 @@ if args.hints:
                 bed_file = this_hints_file + ".bed"
                 info_out_file = this_hints_file + ".infoOut.txt"
                 gtf2bb(this_hints_file, gp_file, bed_file,
-                       bb_file, info_out_file, ChromSizes_file, sort_tool)
+                       bb_file, info_out_file, ChromSizes_file, sort_tool, False) # check whether sometimes CDS hints have frame?
             else:
                 this_sorted_hints_file = this_hints_file + ".sorted"
                 sort_bed3(this_hints_file, this_sorted_hints_file)
