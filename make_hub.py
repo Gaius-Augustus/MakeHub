@@ -625,9 +625,13 @@ def gemoma2aug_gtf(gemoma_file, aug_like_file):
                         line = line.strip()
                         if re.search(r'\tCDS\t', line) or re.search(r'\tfive_prime_UTR\t', line) or re.search(r'\tthree_prime_UTR\t', line):
                             f0, f1, f2, f3, f4, f5, f6, f7, f8 = line.split()
-                            gff3_part = f8.split(";")
-                            tid_part = gff3_part[1].split("=")
-                            gid = tid_part[1]
+                            if re.match(r"ID=", f8):
+                                gff3_part = f8.split(";")
+                                tid_part = gff3_part[1].split("=")
+                                gid = tid = tid_part[1]
+                            else:
+                                thismatch = re.search(r'Parent=([^;]+);?', f8)
+                                gid = tid = thismatch.group(1)
                             if re.search(r'_R\d+', gid):
                                 gid_groups = re.search(
                                     r'(^\S+)_R\d+', gid).groups()
@@ -640,7 +644,7 @@ def gemoma2aug_gtf(gemoma_file, aug_like_file):
                                              f3 + "\t" + f4 + "\t" + f5 + "\t" +
                                              f6 + "\t" + f7 + "\t" +
                                              "gene_id \"" + gid + "\"; " +
-                                             "transcript_id \"" + tid_part[1] +
+                                             "transcript_id \"" + tid +
                                              "\";\n")
             except IOError:
                 frameinfo = getframeinfo(currentframe())
