@@ -574,7 +574,7 @@ def make_gtf_sane(annot_file, ucsc_file):
         with open(annot_file, "r") as annot_handle:
             txs = {}
             for line in annot_handle:
-                if (len(line) > 1) and (not(re.match(r'^#', line))):
+                if ('transcript_id' in line):
                     seq, first_part, strand, second_part, txid = re.search(
                         r'(\S+)(\t\S+\t\S+\t\d+\t\d+\t\S+\t)(\S+)(\t\S+\t).*transcript_id\s\"(\S+)\"', line).groups()
                     if txid not in txs:
