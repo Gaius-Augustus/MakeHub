@@ -301,7 +301,7 @@ elif args.bam:
               str(frameinfo.lineno) + ': '
               + "Unable to locate samtools binary!")
         print("samtools is available as package in many Linux distributions.")
-        print("For example, pn Ubuntu, try installing with:")
+        print("For example, on Ubuntu, try installing with:")
         print("\"sudo apt install samtools\"")
         print("If samtools is unavailable as a package, you can obtain it " +
               "from github at:")
