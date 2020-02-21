@@ -90,7 +90,7 @@ def gemoma2aug_gtf(gemoma_file, aug_like_file):
                     for line in gemoma_handle:
                         line = line.strip()
                         if re.search(r'\tCDS\t', line) or re.search(r'\tfive_prime_UTR\t', line) or re.search(r'\tthree_prime_UTR\t', line):
-                            f0, f1, f2, f3, f4, f5, f6, f7, f8 = line.split()
+                            f0, f1, f2, f3, f4, f5, f6, f7, f8 = line.split('\t')
                             if re.match(r"ID=", f8):
                                 gff3_part = f8.split(";")
                                 tid_part = gff3_part[1].split("=")
