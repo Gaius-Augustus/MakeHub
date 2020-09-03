@@ -33,10 +33,10 @@ except ImportError:
 
 
 __author__ = "Kathairna J. Hoff"
-__copyright__ = "Copyright 2019. All rights reserved."
+__copyright__ = "Copyright 2019-2020. All rights reserved."
 __credits__ = "Mario Stanke"
 __license__ = "Artistic Licsense"
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 __email__ = "katharina.hoff@uni-greifswald.de"
 __status__ = "production"
 
@@ -133,8 +133,10 @@ parser.add_argument('-P', '--no_genePredToBigGenePred', action='store_true',
                     'kentutils from the older ENCODE github repository; if activated, ' +
                     'gene prediction tracks will be output to bigBed instead of bigGenePred ' +
                     'format and amino acid display will not be possible in gene tracks.')
-parser.add_argument('-v', '--verbosity', required=False, type=int, default=0,
+parser.add_argument('-u', '--verbosity', required=False, type=int, default=0,
                     help="If INT>0 verbose output log is produced")
+parser.add_argument('-v', '--version', action='version',
+                    version='%(prog)s ' + __version__)
 args = parser.parse_args()
 
 
