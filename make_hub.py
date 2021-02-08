@@ -21,7 +21,6 @@ from difflib import SequenceMatcher
 from inspect import currentframe, getframeinfo
 try:
     from Bio.Seq import Seq
-    from Bio.Alphabet import generic_dna, generic_protein
     from Bio import SeqIO
     from Bio.SeqRecord import SeqRecord
 except ImportError:
@@ -375,7 +374,7 @@ if args.verbosity > 0:
     print("Searching for required UCSC tools:")
 for key, val in ucsc_tools.items():
     # genePredToBigBed is optional because some users might not have easy access
-    if key is 'genePredToBigBed' and no_genePredToBigBed:
+    if key == 'genePredToBigBed' and no_genePredToBigBed:
         continue
     if shutil.which(key) is not None:
         ucsc_tools[key] = shutil.which(key)
