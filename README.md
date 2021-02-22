@@ -220,7 +220,7 @@ make_hub.py -l hmi1 -L "Rodent tapeworm" -g data/genome.fa -e \
 
 The resulting hub is trivial, as it only displays very basic information about the genome, such as the GC-content, restriction enzyme sites and repeat masking segments.
 
-If you want to visualize the result, connect the following hub with the UCSC genome browser (see section [How to use MakeHub output with UCSC Genome Browser](#use_makehub)): <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi1/hub.txt>
+If you want to visualize the result, connect the following hub with the UCSC genome browser (see section [How to use MakeHub output with UCSC Genome Browser](#use_makehub)): <http://bioinf.uni-greifswald.de/bioinf/makehub/examples/hmi1/hub.txt>
 
 
 Usage example 2:
@@ -233,7 +233,7 @@ make_hub.py -l hmi2 -L "Rodent tapeworm" -g data/genome.fa -e \
 
 In comparison to the first example, the resulting hub has a track with reference annotation genes, and a track with coverage information from RNA-Seq data, and it displays the native BAM-file (```-d```).
 
-If you want to visualize the result, connect the following hub with the UCSC genome browser (see section  [How to use MakeHub output with UCSC Genome Browser](#use_makehub)): <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi2/hub.txt>
+If you want to visualize the result, connect the following hub with the UCSC genome browser (see section  [How to use MakeHub output with UCSC Genome Browser](#use_makehub)): <http:/bioinf.uni-greifswald.de/bioinf/makehub/examples/hmi2/hub.txt>
 
 Usage example 4:
 
@@ -247,7 +247,7 @@ make_hub.py -l hmi4 -L "Rodent tapeworm" -g data/genome.fa -e \
 
 In comparison to the first two examples, the resulting hub has a large number of evidence and gene prediction tracks from BRAKER, MAKER, Gemoma, GlimmerHMM and SNAP.
 
-If you want to visualize the result, connect the following hub with the UCSC genome browser (see section [How to use MakeHub output with UCSC Genome Browser](#use_makehub)): <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi4/hub.txt>
+If you want to visualize the result, connect the following hub with the UCSC genome browser (see section [How to use MakeHub output with UCSC Genome Browser](#use_makehub)): <http://bioinf.uni-greifswald.de/bioinf/makehub/examples/hmi4/hub.txt>
 
 Adding tracks to existing hub
 -----------------------------
@@ -291,7 +291,7 @@ make_hub.py -l hmi3 -e katharina.hoff@uni-greifswald.de -i data/hintsfile.gff \
   -A -E data/gemoma.gff
 ```
 
-If you want to visualize the result, connect the following hub with the UCSC genome browser (see section [How to use MakeHub output with UCSC Genome Browser](#use_makehub)): <http://augustus.uni-greifswald.de/bioinf/makehub/examples/hmi3/hub.txt>
+If you want to visualize the result, connect the following hub with the UCSC genome browser (see section [How to use MakeHub output with UCSC Genome Browser](#use_makehub)): <http://bioinf.uni-greifswald.de/bioinf/makehub/examples/hmi3/hub.txt>
 
 Options explained
 -----------------
