@@ -1712,7 +1712,7 @@ if not args.add_track:
             with open(trackDb_file, "a") as trackDb_handle:
                 visibility_counter, visibility = set_visibility(
                     visibility_counter)
-                trackDb_handle.write("track RMsoft\nlongLabel Softmaked Repeats\n" +
+                trackDb_handle.write("track RMsoft\nlongLabel Softmasked Repeats\n" +
                                      "shortLabel Repeats\ngroup reps\ntype bigBed 3 .\n" +
                                      "bigDataUrl " + args.short_label +
                                      "_softmasking.bb\nvisibility " + visibility + "\n" +
