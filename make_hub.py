@@ -839,7 +839,7 @@ def sort_bed3(bed3_file, bed3_sorted_file):
     try:
         with open(script_file, 'w') as script_handle:
             script_handle.write(
-                '#!/bin/bash\nLC_COLLATE=C\nsort -k1,1 -k2,2n ' + bed3_file +
+                '#!/bin/bash\nexport LC_COLLATE=C\nsort -k1,1 -k2,2n ' + bed3_file +
                 ' > ' + bed3_sorted_file)
     except IOError:
         frameinfo = getframeinfo(currentframe())
@@ -1644,6 +1644,7 @@ if not args.add_track:
         print('Generating cytoband track...')
         cytoBand_sort_file = tmp_dir + args.short_label + ".cytoBand.sorted"
         cytoBand_bed = tmp_dir + args.short_label + ".cytoband.bed"
+        cytoBand_bed_sorted = cytoBand_bed + ".sorted"
         cytoBand_file = hub_dir + "cytoBandIdeo.bb"
         try:
             with open(ChromSizes_file, "r") as chrom_sizes_handle:
@@ -1680,7 +1681,8 @@ if not args.add_track:
                   str(frameinfo.lineno) + ': ' + "Failed to open file " +
                   cytoBand_bed + " for writing!")
             quit(1)
-        bed2bigBed(4, cytoBand_bed, ChromSizes_file,
+        sort_bed3(cytoBand_bed,cytoBand_bed_sorted)
+        bed2bigBed(4, cytoBand_bed_sorted, ChromSizes_file,
                    cytoBand_file, ucsc_as_files['cytoBand.as'])
         try:
             with open(trackDb_file, "a+") as trackDb_handle:
