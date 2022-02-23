@@ -494,7 +494,7 @@ make_hub.py prints information about separate steps on STDOUT. Please let us kno
 Citing MakeHub
 ==============
 
-Hoff KJ, “MakeHub: Fully automated generation of UCSC Genome Browser Assembly Hubs.” *bioRxiv*: doi: https://doi.org/10.1101/550145 
+Hoff KJ, “MakeHub: Fully automated generation of UCSC Genome Browser Assembly Hubs.”  2019. *Genomics, Proteomics & Bioinformatics*  17(5):546-549. https://doi.org/10.1016/j.gpb.2019.05.003
 
 License
 =======
