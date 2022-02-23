@@ -32,10 +32,10 @@ except ImportError:
 
 
 __author__ = "Kathairna J. Hoff"
-__copyright__ = "Copyright 2019-2020. All rights reserved."
+__copyright__ = "Copyright 2019-2022. All rights reserved."
 __credits__ = "Mario Stanke"
 __license__ = "Artistic Licsense"
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 __email__ = "katharina.hoff@uni-greifswald.de"
 __status__ = "production"
 
@@ -1043,6 +1043,7 @@ def make_gtf_track(trackDb_file, gtf_file, chrom_size_file, short_label, long_la
     run_simple_process(subprcs_args)
 
 
+
 ''' Function that cleans wiggle files '''
 
 
@@ -1156,16 +1157,14 @@ def bamToWig(bam_file, wig_file, size_file):
                     wig_handle.write(
                         "track name=" + bam_file + " type=wiggle_0\n")
                     lastSeq = ""
-                    lastStart = 0
                     for line in pileup_handle:
                         seq, start, t1, depth, t2, t3 = line.split()
-                        if (seq != lastSeq) and (start != lastStart):
+                        if (seq != lastSeq):
                             wig_handle.write(
                                 "variableStep chrom=" + seq + "\n")
                         if(int(start) <= chrom_sizes[seq]):
                             wig_handle.write(start + "\t" + depth + "\n")
                         lastSeq = seq
-                        lastStart = start
             except IOError:
                 print('Error in file ' + frameinfo.filename + ' at line ' +
                       str(frameinfo.lineno) + ': ' +
