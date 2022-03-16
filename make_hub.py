@@ -425,12 +425,12 @@ for key, val in ucsc_tools.items():
 ''' track color defintion '''
 
 col_idx = 0
-rgb_cols = ['0,0,0', '255,0,0', '0,255,0', '0,0,255', '176,196,222',
-            '0,255,255', '255,0,255', '192,192,192', '128,128,128', '128,0,0',
-            '128,128,0', '0,128,0', '128,0,128', '0,128,128', '0,0,128',
-            '139,0,0', '220,20,60', '233,150,122', '255,140,0', '218,165,32',
-            '154,205,50', '34,139,34', '152,251,152', '72,209,203',
-            '176,224,230', '138,43,226']  # 0 - 25
+rgb_cols = ['0,0,0',       '255,0,0',   '0,255,0',     '0,0,255',     '176,196,222',
+            '0,255,255',   '255,0,255', '192,192,192', '128,128,128', '128,0,0',
+            '128,128,0',   '0,128,0',   '128,0,128',   '0,128,128',   '0,0,128',
+            '139,0,0',     '220,20,60', '233,150,122', '255,140,0',   '218,165,32',
+            '154,205,50',  '34,139,34', '152,251,152', '72,209,203',  '176,224,230', 
+            '138,43,226']  # 0 - 25, number: 26
 
 ''' Create hub directory structure '''
 
@@ -491,7 +491,7 @@ for key, val in ucsc_as_files.items():
 
 
 def set_color(c, col_lst):
-    if c <= 25:
+    if c <= len(col_lst)-2:
         c = c+1
     else:
         c = 0
@@ -541,12 +541,15 @@ def run_simple_process(args_lst):
 
 def run_process_stdinput(args_lst, byte_obj):
     try:
+        # bed files need sorting with LC_COLLATE=C
+        myenv = os.environ.copy()
+        myenv['LC_COLLATE'] = 'C'
         if args.verbosity > 0:
             print("Trying to execute the following command with input from " +
                   "STDIN:")
             print(" ".join(args_lst))
         result = subprocess.run(args_lst, input=byte_obj,
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=myenv)
         if args.verbosity > 0:
             print("Suceeded in executing command.")
         if(result.returncode == 0):
