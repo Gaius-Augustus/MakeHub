@@ -73,7 +73,8 @@ parser.add_argument('-d', '--display_bam_as_bam', action='store_true',
 parser.add_argument('-E', '--gemoma_filtered_predictions', required=False, type=str,
                     help="GFF3 output file of Gemoma")
 parser.add_argument('-X', '--braker_out_dir', required=False, type=str,
-                    help="BRAKER output directory with GTF files")
+                    help="BRAKER output directory with GTF files; works also " +
+                    "for GALBA, warnings are expected in case of GALBA as input.")
 parser.add_argument('-M', '--maker_gff', required=False, type=str,
                     help='MAKER2 output file in GFF3 format')
 parser.add_argument('-I', '--glimmer_gff', required= False, type=str, 
