@@ -1,4 +1,4 @@
-# MakeHub User Guide
+# MakeHub User Guide 
 
 Author and Contact Information
 ------------------------------
