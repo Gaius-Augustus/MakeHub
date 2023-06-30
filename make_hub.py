@@ -598,15 +598,20 @@ def make_gtf_sane(annot_file, ucsc_file):
             txs = {}
             for line in annot_handle:
                 if ('transcript_id' in line):
-                    seq, first_part, strand, second_part, txid = re.search(
-                        r'(\S+)(\t\S+\t\S+\t\d+\t\d+\t\S+\t)(\S+)(\t\S+\t).*transcript_id\s\"(\S+)\"', line).groups()
-                    if txid not in txs:
-                        txs[txid] = {'strand': strand,
-                                     'lines': [], 'sane': True}
+                    if(re.search(
+                        r'(\S+)(\t[^\t]+\t\S+\t\d+\t\d+\t\S+\t)(\S+)(\t\S+\t).*transcript_id\s\"(\S*)\"', line)):
+                        seq, first_part, strand, second_part, txid = re.search(
+                            r'(\S+)(\t[^\t]+\t\S+\t\d+\t\d+\t\S+\t)(\S+)(\t\S+\t).*transcript_id\s\"(\S*)\"', line).groups()
+                        if len(txid) != 0:
+                            if txid not in txs:
+                                txs[txid] = {'strand': strand,
+                                             'lines': [], 'sane': True}
+                            else:
+                                if not(strand == txs[txid]['strand']):
+                                    txs[txid]['sane'] = False
+                            txs[txid]['lines'].append(line)
                     else:
-                        if not(strand == txs[txid]['strand']):
-                            txs[txid]['sane'] = False
-                    txs[txid]['lines'].append(line)
+                        print(line)
     except IOError:
         frameinfo = getframeinfo(currentframe())
         print('Error in file ' + frameinfo.filename + ' at line ' +
