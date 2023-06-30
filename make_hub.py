@@ -1453,7 +1453,7 @@ def write_trackDescription(outfile, track_name, short_method, email, track_color
                          "<p>Please list invidividuals and/or organizations who contributed to the collection and analysis of the data. Be sure to include a preferred contact email address for users who have questions concerning the data.</p>" +
                          "<p>Please direct questions about this assembly hub to " + email + ".</p>\n" +
                          "<h2>References</h2>" +
-                         "<p>Hoff KJ (2019) <a href=\"https://github.com/Gaius-Augustus/MakeHub\">MakeHub</a> (manuscript in preparation)</p>\n" +
+                         "<p>Hoff KJ (2019). Fully automated generation of UCSC Genome Browser Assembly Hubs.” 2019. Genomics, Proteomics & Bioinformatics 17(5):546-549. <a href=\"https://doi.org/10.1016/j.gpb.2019.05.003\">https://doi.org/10.1016/j.gpb.2019.05.003</a></p>\n" +
                          "</body>\n</html>\n")
 
     except IOError:
