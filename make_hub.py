@@ -34,7 +34,7 @@ __author__ = "Kathairna J. Hoff"
 __copyright__ = "Copyright 2019-2022. All rights reserved."
 __credits__ = "Mario Stanke"
 __license__ = "Artistic Licsense"
-__version__ = "1.0.7"
+__version__ = "1.0.8"
 __email__ = "katharina.hoff@uni-greifswald.de"
 __status__ = "production"
 
@@ -1403,7 +1403,7 @@ def maker_to_gtf(line_lst, outfile):
         quit(1)
 
 
-''' Function that writes aboutHub.html file '''
+''' Function that writes description.html file '''
 
 
 def write_aboutHub(outfile, title, latin, assembly, email):
@@ -1542,14 +1542,14 @@ if not args.add_track:
             hub_txt_handle.write("longLabel " + args.long_label + "\n")
             hub_txt_handle.write("genomesFile genomes.txt\n")
             hub_txt_handle.write("email " + args.email + "\n")
-            hub_txt_handle.write("descriptionUrl aboutHub.html\n")
+            hub_txt_handle.write("descriptionUrl description.html\n")
     except IOError:
         frameinfo = getframeinfo(currentframe())
         print('Error in file ' + frameinfo.filename + ' at line ' +
               str(frameinfo.lineno) + ': ' + "Failed to open file " + hub_txt_file +
               " for writing!")
         quit(1)
-    about_file = args.outdir + "/" + args.short_label + "/aboutHub.html"
+    about_file = args.outdir + "/" + args.short_label + "/description.html"
     ass_vers = ""
     if args.assembly_version is not None:
         ass_vers = args.assembly_version
@@ -1851,15 +1851,14 @@ if args.bam:
                                      "bigDataUrl rnaseq_" + str(bam_index) +
                                      ".bw\n" +
                                      "shortLabel RNASeq_" + str(bam_index) +
-                                     "\n" +
+                                     "_wig\n" +
                                      "longLabel RNASeq Wiggle " +
                                      str(bam_index) + " from bam file " +
                                      bam_file + "\ncolor " + this_color +
                                      "\nyLineOnOff on\nyLineMark 0\ngridDefault on\nvisibility ")
                 trackDb_handle.write(
                     visibility + "\nhtml " + "RNASeq_wig_" + str(bam_index) + ".html")
-                trackDb_handle.write("\n\ngroup hints\ntype bigWig\nbigDataUrl rnaseq_" +
-                                     str(bam_index) + ".bw\ncolor " + this_color + "\n\n")
+                trackDb_handle.write("\ngroup hints\n\n")
         except IOError:
             frameinfo = getframeinfo(currentframe())
             print('Error in file ' + frameinfo.filename + ' at line ' +
