@@ -1607,7 +1607,7 @@ if not args.add_track:
             genomes_txt_handle.write("orderKey 4800\n")
             genomes_txt_handle.write(
                 "scientificName " + args.long_label + "\n")
-            genomes_txt_handle.write("htmlPath hmi/description.html\n")
+            genomes_txt_handle.write("htmlPath description.html\n")
     except IOError:
         frameinfo = getframeinfo(currentframe())
         print('Error in file ' + frameinfo.filename + ' at line ' +
